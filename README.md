@@ -34,7 +34,7 @@ Allocating forms have signature `f(A)`. Mutating forms have signatures
 `f!(A)` (in place) and `f!(out, A)` (out of place).
 
 Allocating | Mutating
----------------------
+-----------|---------
 `acos`     | `acos!`
 `asin`     | `asin!`
 `atan`     | `atan!`
@@ -75,7 +75,7 @@ signature `f!(out, A, B)`. These functions fall back on broadcasting
 when 
 
 Allocating | Mutating
----------------------
+-----------|---------
 `atan2`    | `atan2!`
 `hypot`    | `hypot!`
 `.^`       | `pow!`
