@@ -88,5 +88,6 @@ Allocating | Mutating
 
 ![VML Performance Comparison](/benchmark/performance.png)
 
-The dashed line indicates equivalent performance for VML versus the
-implementations in Base.
+Error bars are 95% confidence intervals based on 10 repetitions of each
+test with a 1,000,000 element vector. The dashed line indicates
+equivalent performance for VML versus the implementations in Base.
