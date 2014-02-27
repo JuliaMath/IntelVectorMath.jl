@@ -3,7 +3,7 @@ module VML
 # TODO detect CPU architecture
 const lib = :libmkl_vml_avx
 
-const unary_ops = ((:(Base.acos), :acos!, :Acos),
+const unary_ops = [(:(Base.acos), :acos!, :Acos),
                    (:(Base.asin), :asin!, :Asin),
                    (:(Base.atan), :atan!, :Atan),
                    (:(Base.cos), :cos!, :Cos),
@@ -38,15 +38,15 @@ const unary_ops = ((:(Base.acos), :acos!, :Acos),
                    (:inv_cbrt, :inv_cbrt!, :InvCbrt),
                    (:inv_sqrt, :inv_sqrt!, :InvSqrt),
                    (:pow2o3, :pow2o3!, :Pow2o3),
-                   (:pow3o2, :pow3o2!, :Pow3o2))
+                   (:pow3o2, :pow3o2!, :Pow3o2)]
 
-const binary_vector_ops = ((:(Base.atan2), :atan2!, :Atan2, false),
+const binary_vector_ops = [(:(Base.atan2), :atan2!, :Atan2, false),
                            (:(Base.hypot), :hypot!, :Hypot, false),
                            (:(Base.(:.^)), :pow!, :Pow, true),
                            (:(Base.(:.+)), :add!, :Add, true),
                            (:(Base.(:./)), :divide!, :Div, true),
                            (:(Base.(:.*)), :multiply!, :Mul, true),
-                           (:(Base.(:.-)), :subtract!, :Sub, true))
+                           (:(Base.(:.-)), :subtract!, :Sub, true)]
 
 for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
     # Unary
@@ -75,8 +75,9 @@ for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
     end
 
     # Binary, two vectors
-    function (jlname, jlname!, mklname, broadcast) in binary_vector_ops
+    for (jlname, jlname!, mklname, broadcast) in binary_vector_ops
         mklfn = Base.Meta.quot(symbol("$prefix$mklname"))
+        exports = Symbol[]
         isa(jlname, Expr) || push!(exports, jlname)
         isa(jlname!, Expr) || push!(exports, jlname!)
         @eval begin
@@ -120,9 +121,8 @@ const VML_HA = VMLAccuracy(0x00000002)
 const VML_EP = VMLAccuracy(0x00000003)
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
-
 vml_cur_mode() = ccall((:_vmlGetMode, lib), Cuint, ())
-vml_set_accuracy(m::VMLAccuracy) = ccall((:_vmlSetMode, lib), Cuint, (Ptr{Uint},), &(vml_cur_mode() & mode.mode))
+vml_set_accuracy(m::VMLAccuracy) = ccall((:_vmlSetMode, lib), Cuint, (Ptr{Uint},), &(vml_cur_mode() & m.mode))
 vml_get_accuracy() = VMLAccuracy(vml_cur_mode() & 0x3)
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
