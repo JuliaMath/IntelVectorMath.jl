@@ -122,7 +122,8 @@ const VML_EP = VMLAccuracy(0x00000003)
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
 vml_cur_mode() = ccall((:_vmlGetMode, lib), Cuint, ())
-vml_set_accuracy(m::VMLAccuracy) = ccall((:_vmlSetMode, lib), Cuint, (Ptr{Uint},), &(vml_cur_mode() & m.mode))
+vml_set_accuracy(m::VMLAccuracy) = (ccall((:_vmlSetMode, lib), Cuint, (Uint,),
+                                          (vml_cur_mode() & ~0x03) | m.mode); nothing)
 vml_get_accuracy() = VMLAccuracy(vml_cur_mode() & 0x3)
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy

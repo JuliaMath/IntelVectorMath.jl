@@ -16,9 +16,10 @@ After loading VML.jl, vector calls to functions listed below will
 automatically use VML instead of openlibm when possible.
 
 By default, VML uses `VML_HA` mode, which corresponds to an accuracy of
-<1 ulp. To specify low accuracy, use `vml_set_mode(VML_LA)`. To specify
-enhanced performance, use `vml_set_mode(VML_EP)`. More documentation
-regarding these options is available on [Intel's website](http://software.intel.com/sites/products/documentation/hpc/mkl/vml/vmldata.htm).
+<1 ulp. To specify low accuracy, use `vml_set_accuracy(VML_LA)`. To
+specify enhanced performance, use `vml_set_accuracy(VML_EP)`. More
+documentation regarding these options is available on
+[Intel's website](http://software.intel.com/sites/products/documentation/hpc/mkl/vml/vmldata.htm).
 
 ## Supported functions
 
