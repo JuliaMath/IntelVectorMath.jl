@@ -86,4 +86,7 @@ Allocating | Mutating
 
 ## Performance
 
-TODO
+![VML Performance Comparison](/benchmark/performance.png)
+
+The dashed line indicates equivalent performance for VML versus the
+implementations in Base.
