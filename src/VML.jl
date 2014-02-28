@@ -97,7 +97,7 @@ for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
     end
 
     # Binary, vector and scalar
-    mklfn = Base.Meta.quot(symbol("$(prefix)pow"))
+    mklfn = Base.Meta.quot(symbol("$(prefix)Powx"))
     @eval begin
         export pow!
         function pow!{N}(out::Array{$t,N}, A::Array{$t,N}, b::$t)
