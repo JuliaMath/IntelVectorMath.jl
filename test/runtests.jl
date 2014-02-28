@@ -5,7 +5,7 @@ const NVALS = 1000
 input = [t=>[[(randindomain(t, NVALS, domain),) for (fn, domain) in base_unary];
              [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
               for (fn, domain1, domain2) in base_binary];
-             (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-0.8590604f0, 19.265919f0))[1])]
+             (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-5, 20))[1])]
             for t in (Float32, Float64)]
 fns = [[x[1] for x in base_unary]; [x[1] for x in base_binary]; .^]
 output = [t=>[fns[i](input[t][i]...) for i = 1:length(fns)] for t in (Float32, Float64)]

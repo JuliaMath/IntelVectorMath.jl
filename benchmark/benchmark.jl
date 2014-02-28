@@ -32,22 +32,23 @@ function ratioci(y, x, alpha=0.05)
 end
 
 # First generate some random data and test functions in Base on it
-const NVALS = 1000000
+const NVALS = 1_000_000
 input = [t=>[[(randindomain(t, NVALS, domain),) for (fn, domain) in base_unary];
              [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
-              for (fn, domain1, domain2) in base_binary]]
+              for (fn, domain1, domain2) in base_binary];
+             (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-1, 20))[1])]
             for t in (Float32, Float64)]
-fns = [[x[1] for x in base_unary]; [x[1] for x in base_binary]]
+fns = [[x[1] for x in base_unary]; [x[1] for x in base_binary]; .^]
 
 bench(fns, input, 1)
-builtin = bench(fns, input, 10)
+builtin = bench(fns, input, 25)
 
 # Now with VML
 using VML
 #vml_set_accuracy(VML_LA)
 
 bench(fns, input, 1)
-vml = bench(fns, input, 10)
+vml = bench(fns, input, 25)
 
 # Print ratio
 clf()
@@ -67,7 +68,10 @@ for itype = 1:length(types)
 end
 ax = gca()
 ax[:set_xlim](0, length(fns)+1)
-xticks(1:length(fns)+1, [string(fn.env.name) for fn in fns], rotation=70, fontsize=10)
+fname = [string(fn.env.name) for fn in fns]
+fname[end-1] = "A.^B"
+fname[end] = "A.^b"
+xticks(1:length(fns)+1, fname, rotation=70, fontsize=10)
 title("VML Performance")
 ylabel("Relative Speed (Base/VML)")
 legend(("Float32", "Float64"))
