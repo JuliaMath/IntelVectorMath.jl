@@ -6,6 +6,12 @@ faster than using Julia's built-in functions.
 
 ## Using VML.jl
 
+To use VML.jl, you must have the Intel Vector Math Library installed.
+This is included in [MKL](http://software.intel.com/en-us/intel-mkl),
+which is free for non-commercial use. You must also copy/symlink the
+appropriate shared library to a directory known to the linker (e.g.
+`/usr/local/lib`) or you must modify the path to `lib` in `src/VML.jl`.
+
 Currently, VML.jl is configured to use `libmkl_vml_avx`, which requires
 AVX support. If your system does not have AVX (e.g., most pre-Sandy
 Bridge systems), you will need to modify the `const lib` declaration at
