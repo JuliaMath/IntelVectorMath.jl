@@ -21,13 +21,13 @@ function bench(fns, input, nrep)
 end
 
 function ratioci(y, x, alpha=0.05)
-    tq2 = abs2(quantile(TDist(length(x) + length(y) - 2), alpha))
+    tq² = abs2(quantile(TDist(length(x) + length(y) - 2), alpha))
     μx = mean(x)
-    σx2 = varm(x, μx)
+    σx² = varm(x, μx)
     μy = mean(y)
-    σy2 = varm(y, μy)
-    a = sqrt((μx*μy)^2 - (μx^2 - tq2*σx2)*(μy^2 - tq2*σy2))
-    b = μx^2 - tq2*σx2
+    σy² = varm(y, μy)
+    a = sqrt((μx*μy)^2 - (μx^2 - tq²*σx²)*(μy^2 - tq²*σy²))
+    b = μx^2 - tq²*σx²
     (((μx*μy) - a)/b, ((μx*μy) + a)/b)
 end
 
@@ -67,7 +67,7 @@ for itype = 1:length(types)
 end
 ax = gca()
 ax[:set_xlim](0, length(fns)+1)
-xticks(1:length(fns), [string(fn.env.name) for fn in fns], rotation=70, fontsize=10)
+xticks(1:length(fns)+1, [string(fn.env.name) for fn in fns], rotation=70, fontsize=10)
 title("VML Performance")
 ylabel("Relative Speed (Base/VML)")
 legend(("Float32", "Float64"))
