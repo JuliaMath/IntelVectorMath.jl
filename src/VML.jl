@@ -3,6 +3,37 @@ module VML
 # TODO detect CPU architecture
 const lib = :libmkl_vml_avx
 
+immutable VMLAccuracy
+    mode::Uint
+end
+const VML_LA = VMLAccuracy(0x00000001)
+const VML_HA = VMLAccuracy(0x00000002)
+const VML_EP = VMLAccuracy(0x00000003)
+Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
+                                              m == VML_HA ? "VML_HA" : "VML_EP")
+vml_get_mode() = ccall((:_vmlGetMode, lib), Cuint, ())
+vml_set_mode(mode::Integer) = (ccall((:_vmlSetMode, lib), Cuint, (Uint,), mode); nothing)
+
+vml_set_accuracy(m::VMLAccuracy) = vml_set_mode((vml_get_mode() & ~0x03) | m.mode)
+vml_get_accuracy() = VMLAccuracy(vml_get_mode() & 0x3)
+
+vml_set_mode((vml_get_mode() & ~0x0000FF00))
+function vml_check_error()
+    vml_error = ccall((:_vmlClearErrStatus, lib), Cint, ())
+    if vml_error != 0
+        if vml_error == 1
+            error(DomainError())
+        elseif vml_error == 2 || vml_error == 3 || vml_error == 4
+            # Singularity, overflow, or underflow
+            # I don't think Base throws on these
+        elseif vml_error == 1000
+            warn("VML does not support $(vml_get_accuracy); lower accuracy used instead")
+        else
+            error("an unexpected error occurred in VML ($vml_error)")
+        end
+    end
+end
+
 const unary_ops = [(:(Base.acos), :acos!, :Acos),
                    (:(Base.asin), :asin!, :Asin),
                    (:(Base.atan), :atan!, :Atan),
@@ -60,15 +91,18 @@ for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
             function $(jlname!){N}(out::Array{$t,N}, A::Array{$t,N})
                 size(out) == size(A) || throw(DimensionMismatch())
                 ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}), length(A), A, out)
+                vml_check_error()
                 out
             end
             function $(jlname!)(A::Array{$t})
                 ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}), length(A), A, A)
+                vml_check_error()
                 A
             end
             function $(jlname)(A::Array{$t})
                 out = similar(A)
                 ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}), length(A), A, out)
+                vml_check_error()
                 out
             end
         end
@@ -85,12 +119,14 @@ for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
             function $(jlname!){N}(out::Array{$t,N}, A::Array{$t,N}, B::Array{$t,N})
                 size(out) == size(A) == size(B) || $(broadcast ? :(return broadcast!($jlname, out, A, B)) : :(throw(DimensionMismatch())))
                 ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}, Ptr{$t}), length(A), A, B, out)
+                vml_check_error()
                 out
             end
             function $(jlname){N}(A::Array{$t,N}, B::Array{$t,N})
                 size(A) == size(B) || $(broadcast ? :(return broadcast($jlname, A, B)) : :(throw(DimensionMismatch())))
                 out = similar(A)
                 ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}, Ptr{$t}), length(A), A, B, out)
+                vml_check_error()
                 out
             end
         end
@@ -103,28 +139,17 @@ for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
         function pow!{N}(out::Array{$t,N}, A::Array{$t,N}, b::$t)
             size(out) == size(A) || throw(DimensionMismatch())
             ccall(($mklfn, lib), Void, (Int, Ptr{$t}, $t, Ptr{$t}), length(A), A, b, out)
+            vml_check_error()
             out
         end
         function Base.(:(.^)){N}(A::Array{$t,N}, b::$t)
             out = similar(A)
             ccall(($mklfn, lib), Void, (Int, Ptr{$t}, $t, Ptr{$t}), length(A), A, b, out)
+            vml_check_error()
             out
         end
     end
 end
-
-immutable VMLAccuracy
-    mode::Uint
-end
-const VML_LA = VMLAccuracy(0x00000001)
-const VML_HA = VMLAccuracy(0x00000002)
-const VML_EP = VMLAccuracy(0x00000003)
-Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
-                                              m == VML_HA ? "VML_HA" : "VML_EP")
-vml_cur_mode() = ccall((:_vmlGetMode, lib), Cuint, ())
-vml_set_accuracy(m::VMLAccuracy) = (ccall((:_vmlSetMode, lib), Cuint, (Uint,),
-                                          (vml_cur_mode() & ~0x03) | m.mode); nothing)
-vml_get_accuracy() = VMLAccuracy(vml_cur_mode() & 0x3)
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
 end

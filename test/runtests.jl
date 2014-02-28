@@ -17,6 +17,9 @@ for t in (Float32, Float64), i = 1:length(fns)
     Base.Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "VML $t $fn")
 end
 
+# Verify that we still throw DomainErrors
+Base.Test.@test_throws sqrt([-1.0])
+
 # Setting accuracy
 vml_set_accuracy(VML_LA)
 @assert vml_get_accuracy() == VML_LA
