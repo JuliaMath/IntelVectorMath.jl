@@ -74,11 +74,6 @@ const unary_ops = [(:(Base.acos), :acos!, :Acos),
 const binary_vector_ops = [(:(Base.atan2), :atan2!, :Atan2, false),
                            (:(Base.hypot), :hypot!, :Hypot, false),
                            (:(Base.(:.^)), :pow!, :Pow, true),
-                           (:(Base.(:+)), :add!, :Add, false),
-                           (:(Base.(:.+)), :add!, :Add, true),
-                           (:(Base.(:-)), :subtract!, :Sub, false),
-                           (:(Base.(:.-)), :subtract!, :Sub, true),
-                           (:(Base.(:.*)), :multiply!, :Mul, true),
                            (:(Base.(:./)), :divide!, :Div, true)]
 
 for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))

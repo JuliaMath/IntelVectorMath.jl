@@ -96,7 +96,4 @@ Allocating | Mutating
 `atan2`    | `atan2!`
 `hypot`    | `hypot!`
 `.^`       | `pow!`
-`.+`       | `add!`
 `./`       | `divide!`
-`.*`       | `multiply!`
-`.-`       | `subtract!`
