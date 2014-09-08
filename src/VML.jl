@@ -34,103 +34,125 @@ function vml_check_error()
     end
 end
 
-const unary_ops = [(:(Base.acos), :acos!, :Acos),
-                   (:(Base.asin), :asin!, :Asin),
-                   (:(Base.atan), :atan!, :Atan),
-                   (:(Base.cos), :cos!, :Cos),
-                   (:(Base.sin), :sin!, :Sin),
-                   (:(Base.tan), :tan!, :Tan),
-                   (:(Base.acosh), :acosh!, :Acosh),
-                   (:(Base.asinh), :asinh!, :Asinh),
-                   (:(Base.atanh), :atanh!, :Atanh),
-                   (:(Base.cosh), :cosh!, :Cosh),
-                   (:(Base.sinh), :sinh!, :Sinh),
-                   (:(Base.tanh), :tanh!, :Tanh),
-                   (:(Base.cbrt), :cbrt!, :Cbrt),
-                   (:(Base.sqrt), :sqrt!, :Sqrt),
-                   (:(Base.exp), :exp!, :Exp),
-                   (:(Base.expm1), :expm1!, :Expm1),
-                   (:(Base.log), :log!, :Ln),
-                   (:(Base.log10), :log10!, :Log10),
-                   (:(Base.log1p), :log1p, :Log1p),
-                   (:(Base.abs), :abs!, :Abs),
-                   (:(Base.abs2), :abs2!, :Sqr),
-                   (:(Base.ceil), :ceil!, :Ceil),
-                   (:(Base.floor), :floor!, :Floor),
-                   (:(Base.round), :round!, :Round),
-                   (:(Base.trunc), :trunc!, :Trunc),
-                   (:(Base.erf), :erf!, :Erf),
-                   (:(Base.erfc), :erfc!, :Erfc),
-                   (:(Base.erfinv), :erfinv!, :ErfInv),
-                   (:(Base.erfcinv), :erfcinv!, :ErfcInv),
-                   (:(Base.lgamma), :lgamma!, :LGamma),
-                   (:(Base.gamma), :gamma!, :TGamma),
-                   # Not in Base
-                   (:inv_cbrt, :inv_cbrt!, :InvCbrt),
-                   (:inv_sqrt, :inv_sqrt!, :InvSqrt),
-                   (:pow2o3, :pow2o3!, :Pow2o3),
-                   (:pow3o2, :pow3o2!, :Pow3o2)]
+function vml_prefix(t::DataType)
+    if t == Float32
+        return "_vmls"
+    elseif t == Float64
+        return "_vmld"
+    elseif t == Complex{Float32}
+        return "_vmlc"
+    elseif t == Complex{Float64}
+        return "_vmlz"
+    end
+    error("unknown type $t")
+end
 
-const binary_vector_ops = [(:(Base.atan2), :atan2!, :Atan2, false),
-                           (:(Base.hypot), :hypot!, :Hypot, false),
-                           (:(Base.(:.^)), :pow!, :Pow, true),
-                           (:(Base.(:./)), :divide!, :Div, true)]
-
-for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
-    # Unary
-    for (jlname, jlname!, mklname) in unary_ops
-        mklfn = Base.Meta.quot(symbol("$prefix$mklname"))
-        exports = Symbol[]
-        isa(jlname, Expr) || push!(exports, jlname)
-        isa(jlname!, Expr) || push!(exports, jlname!)
-        @eval begin
-            $(isempty(exports) ? nothing : Expr(:export, exports...))
-            function $(jlname!){N}(out::Array{$t,N}, A::Array{$t,N})
-                size(out) == size(A) || throw(DimensionMismatch())
-                ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}), length(A), A, out)
-                vml_check_error()
-                out
+function def_unary_op(tin, tout, jlname, jlname!, mklname)
+    mklfn = Base.Meta.quot(symbol("$(vml_prefix(tin))$mklname"))
+    exports = Symbol[]
+    isa(jlname, Expr) || push!(exports, jlname)
+    isa(jlname!, Expr) || push!(exports, jlname!)
+    @eval begin
+        $(isempty(exports) ? nothing : Expr(:export, exports...))
+        function $(jlname!){N}(out::Array{$tout,N}, A::Array{$tin,N})
+            size(out) == size(A) || throw(DimensionMismatch())
+            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            vml_check_error()
+            out
+        end
+        $(if tin == tout
+            quote
+                function $(jlname!)(A::Array{$tin})
+                    ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
+                    vml_check_error()
+                    A
+                end
             end
-            function $(jlname!)(A::Array{$t})
-                ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}), length(A), A, A)
-                vml_check_error()
-                A
-            end
-            function $(jlname)(A::Array{$t})
-                out = similar(A)
-                ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}), length(A), A, out)
-                vml_check_error()
-                out
-            end
+        end)
+        function $(jlname)(A::Array{$tin})
+            out = similar(A, $tout)
+            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            vml_check_error()
+            out
         end
     end
+end
 
-    # Binary, two vectors
-    for (jlname, jlname!, mklname, broadcast) in binary_vector_ops
-        mklfn = Base.Meta.quot(symbol("$prefix$mklname"))
-        exports = Symbol[]
-        isa(jlname, Expr) || push!(exports, jlname)
-        isa(jlname!, Expr) || push!(exports, jlname!)
-        @eval begin
-            $(isempty(exports) ? nothing : Expr(:export, exports...))
-            function $(jlname!){N}(out::Array{$t,N}, A::Array{$t,N}, B::Array{$t,N})
-                size(out) == size(A) == size(B) || $(broadcast ? :(return broadcast!($jlname, out, A, B)) : :(throw(DimensionMismatch())))
-                ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}, Ptr{$t}), length(A), A, B, out)
-                vml_check_error()
-                out
-            end
-            function $(jlname){N}(A::Array{$t,N}, B::Array{$t,N})
-                size(A) == size(B) || $(broadcast ? :(return broadcast($jlname, A, B)) : :(throw(DimensionMismatch())))
-                out = similar(A)
-                ccall(($mklfn, lib), Void, (Int, Ptr{$t}, Ptr{$t}, Ptr{$t}), length(A), A, B, out)
-                vml_check_error()
-                out
-            end
+function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
+    mklfn = Base.Meta.quot(symbol("$(vml_prefix(tin))$mklname"))
+    exports = Symbol[]
+    isa(jlname, Expr) || push!(exports, jlname)
+    isa(jlname!, Expr) || push!(exports, jlname!)
+    @eval begin
+        $(isempty(exports) ? nothing : Expr(:export, exports...))
+        function $(jlname!){N}(out::Array{$tout,N}, A::Array{$tin,N}, B::Array{$tin,N})
+            size(out) == size(A) == size(B) || $(broadcast ? :(return broadcast!($jlname, out, A, B)) : :(throw(DimensionMismatch())))
+            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            vml_check_error()
+            out
+        end
+        function $(jlname){N}(A::Array{$tout,N}, B::Array{$tin,N})
+            size(A) == size(B) || $(broadcast ? :(return broadcast($jlname, A, B)) : :(throw(DimensionMismatch())))
+            out = similar(A)
+            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            vml_check_error()
+            out
         end
     end
+end
 
-    # Binary, vector and scalar
-    mklfn = Base.Meta.quot(symbol("$(prefix)Powx"))
+for t in (Float32, Float64, Complex64, Complex128)
+    # Unary, real or complex
+    def_unary_op(t, t, :(Base.acos), :acos!, :Acos)
+    def_unary_op(t, t, :(Base.asin), :asin!, :Asin)
+    def_unary_op(t, t, :(Base.acosh), :acosh!, :Acosh)
+    def_unary_op(t, t, :(Base.asinh), :asinh!, :Asinh)
+    def_unary_op(t, t, :(Base.sqrt), :sqrt!, :Sqrt)
+    def_unary_op(t, t, :(Base.exp), :exp!, :Exp)
+    def_unary_op(t, t, :(Base.log), :log!, :Ln)
+
+    # Binary, real or complex
+    def_binary_op(t, t, :(Base.(:.^)), :pow!, :Pow, true)
+    def_binary_op(t, t, :(Base.(:./)), :divide!, :Div, true)
+end
+
+for t in (Float32, Float64)
+    # Unary, real-only
+    def_unary_op(t, t, :(Base.cbrt), :cbrt!, :Cbrt)
+    def_unary_op(t, t, :(Base.expm1), :expm1!, :Expm1)
+    def_unary_op(t, t, :(Base.log1p), :log1p, :Log1p)
+    def_unary_op(t, t, :(Base.abs), :abs!, :Abs)
+    def_unary_op(t, t, :(Base.abs2), :abs2!, :Sqr)
+    def_unary_op(t, t, :(Base.ceil), :ceil!, :Ceil)
+    def_unary_op(t, t, :(Base.floor), :floor!, :Floor)
+    def_unary_op(t, t, :(Base.round), :round!, :Round)
+    def_unary_op(t, t, :(Base.trunc), :trunc!, :Trunc)
+    def_unary_op(t, t, :(Base.erf), :erf!, :Erf)
+    def_unary_op(t, t, :(Base.erfc), :erfc!, :Erfc)
+    def_unary_op(t, t, :(Base.erfinv), :erfinv!, :ErfInv)
+    def_unary_op(t, t, :(Base.erfcinv), :erfcinv!, :ErfcInv)
+    def_unary_op(t, t, :(Base.lgamma), :lgamma!, :LGamma)
+    def_unary_op(t, t, :(Base.gamma), :gamma!, :TGamma)
+    # Not in Base
+    def_unary_op(t, t, :inv_cbrt, :inv_cbrt!, :InvCbrt)
+    def_unary_op(t, t, :inv_sqrt, :inv_sqrt!, :InvSqrt)
+    def_unary_op(t, t, :pow2o3, :pow2o3!, :Pow2o3)
+    def_unary_op(t, t, :pow3o2, :pow3o2!, :Pow3o2)
+
+    # Enabled only for Real. MKL guarantees higher accuracy, but at a
+    # substantial performance cost.
+    def_unary_op(t, t, :(Base.atan), :atan!, :Atan)
+    def_unary_op(t, t, :(Base.cos), :cos!, :Cos)
+    def_unary_op(t, t, :(Base.sin), :sin!, :Sin)
+    def_unary_op(t, t, :(Base.tan), :tan!, :Tan)
+    def_unary_op(t, t, :(Base.atanh), :atanh!, :Atanh)
+    def_unary_op(t, t, :(Base.cosh), :cosh!, :Cosh)
+    def_unary_op(t, t, :(Base.sinh), :sinh!, :Sinh)
+    def_unary_op(t, t, :(Base.tanh), :tanh!, :Tanh)
+    def_unary_op(t, t, :(Base.log10), :log10!, :Log10)
+
+    # .^ to scalar power
+    mklfn = Base.Meta.quot(symbol("$(vml_prefix(t))Powx"))
     @eval begin
         export pow!
         function pow!{N}(out::Array{$t,N}, A::Array{$t,N}, b::$t)
@@ -146,6 +168,25 @@ for (prefix, t) in ((:_vmls, :Float32), (:_vmld, :Float64))
             out
         end
     end
+
+    # Binary, real-only
+    def_binary_op(t, t, :(Base.atan2), :atan2!, :Atan2, false)
+    def_binary_op(t, t, :(Base.hypot), :hypot!, :Hypot, false)
+
+    # Unary, complex-only
+    def_unary_op(t, Complex{t}, :(Base.cis), :cis!, :CIS)
+    # def_unary_op(Complex{t}, Complex{t}, :(Base.conj), :conj!, :Conj)
+    def_unary_op(Complex{t}, t, :(Base.abs), :abs!, :Abs)
+    def_unary_op(Complex{t}, t, :(Base.angle), :angle!, :Arg)
+
+    # Binary, complex-only. These are more accurate but performance is
+    # either equivalent to Base or slower.
+    # def_binary_op(Complex{t}, Complex{t}, :(Base.(:+)), :add!, :Add, false)
+    # def_binary_op(Complex{t}, Complex{t}, :(Base.(:.+)), :add!, :Add, true)
+    # def_binary_op(Complex{t}, Complex{t}, :(Base.(:.*)), :multiply!, :Mul, true)
+    # def_binary_op(Complex{t}, Complex{t}, :(Base.(:-)), :subtract!, :Sub, false)
+    # def_binary_op(Complex{t}, Complex{t}, :(Base.(:.-)), :subtract!, :Sub, true)
+    # def_binary_op(Complex{t}, Complex{t}, :multiply_conj, :multiply_conj!, :Mul, false)
 end
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy

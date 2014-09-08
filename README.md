@@ -33,6 +33,8 @@ regarding these options is available on
 
 ![VML Performance Comparison](/benchmark/performance.png)
 
+![VML Complex Performance Comparison](/benchmark/performance_complex.png)
+
 Tests were performed on an Intel(R) Core(TM) i7-3930K CPU. Error bars
 are 95% confidence intervals based on 25 repetitions of each test with
 a 1,000,000 element vector. The dashed line indicates equivalent
