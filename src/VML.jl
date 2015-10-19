@@ -2,9 +2,10 @@ module VML
 
 # TODO detect CPU architecture
 const lib = :libmkl_vml_avx
+Libdl.dlopen(:libmkl_rt)
 
 immutable VMLAccuracy
-    mode::Uint
+    mode::UInt
 end
 const VML_LA = VMLAccuracy(0x00000001)
 const VML_HA = VMLAccuracy(0x00000002)
@@ -12,7 +13,7 @@ const VML_EP = VMLAccuracy(0x00000003)
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
 vml_get_mode() = ccall((:_vmlGetMode, lib), Cuint, ())
-vml_set_mode(mode::Integer) = (ccall((:_vmlSetMode, lib), Cuint, (Uint,), mode); nothing)
+vml_set_mode(mode::Integer) = (ccall((:_vmlSetMode, lib), Cuint, (UInt,), mode); nothing)
 
 vml_set_accuracy(m::VMLAccuracy) = vml_set_mode((vml_get_mode() & ~0x03) | m.mode)
 vml_get_accuracy() = VMLAccuracy(vml_get_mode() & 0x3)
