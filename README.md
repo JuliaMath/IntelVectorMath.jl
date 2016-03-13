@@ -1,5 +1,5 @@
 # VML
-
+[![Build Status](https://travis-ci.org/JuliaLang/VML.jl.svg?branch=master)](https://travis-ci.org/JuliaLang/VML.jl)
 This package provides bindings to the Intel Vector Math Library for
 arithmetic and transcendental functions. It is often substantially
 faster than using Julia's built-in functions.
@@ -7,7 +7,7 @@ faster than using Julia's built-in functions.
 ## Using VML.jl
 
 To use VML.jl, you must have the Intel Vector Math Library installed,
-and your Julia compiler must be compiled by the Intel compilers.
+and your Julia compiler must be compiled by the Intel compilers (specifically, using MKL)
 This is included in [MKL](http://software.intel.com/en-us/intel-mkl),
 which is free for non-commercial use. You must also copy/symlink the
 appropriate shared library to a directory known to the linker (e.g.
