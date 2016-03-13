@@ -1,10 +1,15 @@
 # First generate some random data and test functions in Base on it
 const NVALS = 1000
-input = [t=>[[(randindomain(t, NVALS, domain),) for (fn, domain) in base_unary];
-             [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
-              for (fn, domain1, domain2) in base_binary];
-             (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-5, 20))[1])]
-            for t in datatypes]
+input = [
+    t=>[
+        [(randindomain(t, NVALS, domain),) for (fn, domain) in base_unary];
+        [
+            (randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
+            for (fn, domain1, domain2) in base_binary
+        ];
+        (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-5, 20))[1])
+    ] for t in datatypes
+]
 fns = [[x[1] for x in base_unary]; [x[1] for x in base_binary]; .^]
 output = [t=>[fns[i](input[t][i]...) for i = 1:length(fns)] for t in datatypes]
 

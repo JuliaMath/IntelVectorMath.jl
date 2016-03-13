@@ -25,12 +25,12 @@ const base_binary = (
     # (Base.(:.^), (0, 100), (-2, 10))
 )
 
-function randindomain{T<:Complex}(t::Type{T}, n, domain)
+function randindomain{T<:Real}(t::Type{Complex{T}}, n, domain)
     d1 = convert(t, domain[1])
     d2 = convert(t, domain[2])
     ddiff = d2 - d1
     @assert isfinite(ddiff)
-    v = rand(t, 2 * n)
+    v = rand(T, 2 * n)
     for i = 1:length(v)
         v[i] = v[i] * ddiff + d1
     end
