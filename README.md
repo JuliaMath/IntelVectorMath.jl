@@ -1,5 +1,6 @@
 # VML
 [![Build Status](https://travis-ci.org/JuliaLang/VML.jl.svg?branch=master)](https://travis-ci.org/JuliaLang/VML.jl)
+
 This package provides bindings to the Intel Vector Math Library for
 arithmetic and transcendental functions. It is often substantially
 faster than using Julia's built-in functions.
