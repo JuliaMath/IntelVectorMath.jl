@@ -1,0 +1,13 @@
+sudo: required
+dist: trusty
+notification: 
+    email: false
+
+before_install:
+    - wget -q -O /dev/stdout "https://raw.githubusercontent.com/sunoru/julia-icc-travis/master/install-julia.sh" | bash
+    - . ~/.bashrc
+
+script:
+    - julia -e 'Pkg.clone(pwd()); Pkg.test("VML", coverage=true)'
+after_success:
+    - julia -e 'cd(Pkg.dir("VML")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
