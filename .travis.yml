@@ -8,7 +8,7 @@ before_install:
     - . ~/.bashrc
 
 script:
-    - julia-release-0.4 -e 'Pkg.clone(pwd()); Pkg.test("VML", coverage=true)'
+    - julia -e 'Pkg.clone(pwd()); Pkg.test("VML", coverage=true)'
 
 after_success:
-    - julia-release-0.4 -e 'cd(Pkg.dir("VML")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+    - julia -e 'cd(Pkg.dir("VML")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
