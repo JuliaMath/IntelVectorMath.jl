@@ -35,8 +35,8 @@ const base_unary_real = (
 const base_binary_real = (
     (Base.atan2, (-1, 1), (-1, 1)),
     (Base.hypot, (-1000, 1000), (-1000, 1000)),
-    (Base.(:./), (-1000, 1000), (-1000, 1000)),
-    (Base.(:.^), (0, 100), (-5, 20))
+    (getfield(Base, :./), (-1000, 1000), (-1000, 1000)),
+    (getfield(Base, :.^), (0, 100), (-5, 20))
 )
 
 const base_unary_complex = (
@@ -62,7 +62,7 @@ const base_unary_complex = (
 )
 
 const base_binary_complex = (
-    (Base.(:./), (-1000, 1000), (-1000, 1000)),
+    (getfield(Base, :./), (-1000, 1000), (-1000, 1000)),
     # (Base.(:.^), (0, 100), (-2, 10))
 )
 
