@@ -1,0 +1,12 @@
+language: julia
+os:
+    - linux
+    - osx
+julia:
+    - 0.5
+    - nightly
+notifications:
+    email: false
+sudo: false
+after_success:
+    - julia -e 'cd(Pkg.dir("VML")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
