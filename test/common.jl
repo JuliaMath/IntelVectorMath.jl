@@ -67,8 +67,8 @@ const base_binary_complex = (
 )
 
 function randindomain{T<:Real}(t::Type{T}, n, domain)
-    d1 = oftype(t, domain[1])
-    d2 = oftype(t, domain[2])
+    d1 = convert(t, domain[1])
+    d2 = convert(t, domain[2])
     ddiff = d2 - d1
     @assert isfinite(ddiff)
     v = rand(t, n)
@@ -79,8 +79,8 @@ function randindomain{T<:Real}(t::Type{T}, n, domain)
 end
 
 function randindomain{T<:Complex}(t::Type{T}, n, domain)
-    d1 = oftype(t, domain[1])
-    d2 = oftype(t, domain[2])
+    d1 = convert(t, domain[1])
+    d2 = convert(t, domain[2])
     ddiff = d2 - d1
     @assert isfinite(ddiff)
     v = rand(t, 2*n)
