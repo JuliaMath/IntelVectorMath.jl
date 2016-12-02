@@ -1,5 +1,7 @@
 module VML
 
+import Base: .^, ./
+
 # TODO detect CPU architecture
 const lib = :libmkl_vml_avx
 Libdl.dlopen(:libmkl_rt)
@@ -49,7 +51,7 @@ function vml_prefix(t::DataType)
 end
 
 function def_unary_op(tin, tout, jlname, jlname!, mklname)
-    mklfn = Base.Meta.quot(symbol("$(vml_prefix(tin))$mklname"))
+    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
     exports = Symbol[]
     isa(jlname, Expr) || push!(exports, jlname)
     isa(jlname!, Expr) || push!(exports, jlname!)
@@ -80,7 +82,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname)
 end
 
 function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
-    mklfn = Base.Meta.quot(symbol("$(vml_prefix(tin))$mklname"))
+    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
     exports = Symbol[]
     isa(jlname, Expr) || push!(exports, jlname)
     isa(jlname!, Expr) || push!(exports, jlname!)
@@ -113,8 +115,8 @@ for t in (Float32, Float64, Complex64, Complex128)
     def_unary_op(t, t, :(Base.log), :log!, :Ln)
 
     # Binary, real or complex
-    def_binary_op(t, t, :(Base.(:.^)), :pow!, :Pow, true)
-    def_binary_op(t, t, :(Base.(:./)), :divide!, :Div, true)
+    def_binary_op(t, t, :(.^), :pow!, :Pow, true)
+    def_binary_op(t, t, :(./), :divide!, :Div, true)
 end
 
 for t in (Float32, Float64)
@@ -153,7 +155,7 @@ for t in (Float32, Float64)
     def_unary_op(t, t, :(Base.log10), :log10!, :Log10)
 
     # .^ to scalar power
-    mklfn = Base.Meta.quot(symbol("$(vml_prefix(t))Powx"))
+    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(t))Powx"))
     @eval begin
         export pow!
         function pow!{N}(out::Array{$t,N}, A::Array{$t,N}, b::$t)
@@ -162,7 +164,7 @@ for t in (Float32, Float64)
             vml_check_error()
             out
         end
-        function Base.(:(.^)){N}(A::Array{$t,N}, b::$t)
+        function (.^){N}(A::Array{$t,N}, b::$t)
             out = similar(A)
             ccall(($mklfn, lib), Void, (Int, Ptr{$t}, $t, Ptr{$t}), length(A), A, b, out)
             vml_check_error()
