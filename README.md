@@ -91,7 +91,7 @@ Allocating | Mutating
 
 Allocating forms have signature `f(A, B)`. Mutating forms have
 signature `f!(out, A, B)`. These functions fall back on broadcasting
-when 
+when
 
 Allocating | Mutating
 -----------|---------
