@@ -25,7 +25,7 @@ function vml_check_error()
     vml_error = ccall((:_vmlClearErrStatus, lib), Cint, ())
     if vml_error != 0
         if vml_error == 1
-            error(DomainError())
+            throw(DomainError())
         elseif vml_error == 2 || vml_error == 3 || vml_error == 4
             # Singularity, overflow, or underflow
             # I don't think Base throws on these
