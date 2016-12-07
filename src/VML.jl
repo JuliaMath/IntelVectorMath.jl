@@ -3,8 +3,10 @@ module VML
 import Base: .^, ./
 
 # TODO detect CPU architecture
+using Compat
+
 const lib = :libmkl_vml_avx
-Libdl.dlopen(:libmkl_rt)
+Libdl.dlopen("libmkl_rt")
 
 immutable VMLAccuracy
     mode::UInt
