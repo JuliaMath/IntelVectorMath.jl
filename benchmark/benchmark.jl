@@ -1,30 +1,67 @@
-using Distributions, PyCall, PyPlot
-@pyimport matplotlib.gridspec as gridspec
-
 include(joinpath(dirname(dirname(@__FILE__)), "test", "common.jl"))
+module VMLBench
+using VML
+using Distributions, PyPlot, Statistics
+# using PyCall
+# @pyimport matplotlib.gridspec as gridspec
+
+import ..TestStuff:base_unary_real, base_binary_real, randindomain
+import ..TestStuff:base_unary_complex, base_binary_complex
+
 complex = !isempty(ARGS) && ARGS[1] == "complex"
 
 function bench(fns, input)
-    [t=>begin
-        times = Array(Vector{Float64}, length(fns))
+    Dict(t=>begin
+        times = Array{Vector{Float64}}(undef, length(fns))
         for ifn = 1:length(fns)
             fn = fns[ifn]
             inp = input[t][ifn]
-            fn(inp...)
-            gc()
-            nrep = max(iceil(2/(@elapsed (gc_disable(); fn(inp...); gc_enable(); gc()))), 3)
+            res = fn.(inp...)
+            # gc()
+            # nrep = max(iceil(2/(@elapsed (gc_disable(); fn.(inp...); gc_enable(); gc()))), 3)
+            nrep = max(ceil(Int,2/(@elapsed ( fn.(inp...)))), 3)
             println("Running $nrep reps of $fn($t)")
             @time times[ifn] = [begin
-                gc()
-                gc_disable()
-                time = @elapsed fn(inp...)
-                gc_enable()
+                # gc()
+                # gc_disable()
+                time = @elapsed begin
+                                res .= fn.(inp...)
+                                end
+                # gc_enable()
                 time
             end for i = 1:nrep]
             # println((mean(times[ifn]), std(times[ifn])))
         end
         times
-    end for t in types]
+    end for t in types)
+end
+
+function vbench(fns, fns!, input)
+    Dict(t=>begin
+        times = Array{Vector{Float64}}(undef, length(fns))
+        for ifn = 1:length(fns)
+            fn = fns[ifn]
+            inp = input[t][ifn]
+            res = fn(inp...)
+            fn! = fns![ifn]
+            fn!(res, inp...)
+            # gc()
+            # nrep = max(iceil(2/(@elapsed (gc_disable(); fn(inp...); gc_enable(); gc()))), 3)
+            nrep = max(ceil(Int,2/(@elapsed (fn!(res, inp...); ))), 3)
+            println("Running $nrep reps of $fn($t)")
+            @time times[ifn] = [begin
+                # gc()
+                # gc_disable()
+                time = @elapsed begin
+                   fn!(res, inp...)
+                end
+                # gc_enable()
+                time
+            end for i = 1:nrep]
+            # println((mean(times[ifn]), std(times[ifn])))
+        end
+        times
+    end for t in types)
 end
 
 function ratioci(y, x, alpha=0.05)
@@ -42,20 +79,21 @@ end
 const NVALS = 1_000_000
 base_unary = complex ? base_unary_complex : base_unary_real
 base_binary = complex ? base_binary_complex : base_binary_real
-types = complex ? (Complex64, Complex128) : (Float32, Float64)
-input = [t=>[[(randindomain(t, NVALS, domain),) for (fn, domain) in base_unary];
+types = complex ? (ComplexF32, ComplexF64) : (Float32, Float64)
+input = Dict(t=>[[(randindomain(t, NVALS, domain),) for (fn, vfn, vfn!, domain) in base_unary];
              [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
-              for (fn, domain1, domain2) in base_binary];
+              for (fn, vfn, vfn!, domain1, domain2) in base_binary];
              (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-1, 20))[1])]
-            for t in types]
-fns = [[x[1] for x in base_unary]; [x[1] for x in base_binary]; (complex ? [] : .^)]
+            for t in types)
+fns = [[x[1] for x in base_unary]; [x[1] for x in base_binary]; (complex ? [] : ^)]
+vfns = [[x[2] for x in base_unary]; [x[2] for x in base_binary]; (complex ? [] : v_pow)]
+vfns! = [[x[3] for x in base_unary]; [x[3] for x in base_binary]; (complex ? [] : pow!)]
 
 builtin = bench(fns, input)
 
 # Now with VML
-using VML
 
-vml = bench(fns, input)
+vml = vbench(vfns, vfns!, input)
 
 # Print ratio
 clf()
@@ -74,14 +112,21 @@ for itype = 1:length(types)
 end
 ax = gca()
 ax[:set_xlim](0, length(fns)+1)
-fname = [string(fn.env.name) for fn in fns]
+function shortname(s)
+    n=findlast(".",s)
+    n === nothing ? s : s[first(n)+1:end]
+end
+
+fname = shortname.([string(fn) for fn in fns])
 if !complex
     fname[end-1] = "A.^B"
     fname[end] = "A.^b"
 end
 xticks(1:length(fns)+1, fname, rotation=70, fontsize=10)
 title("VML Performance")
-ylabel("Relative Speed (Base/VML)")
+ylabel("Relative Time (Base/VML)")
 legend([string(x) for x in types])
 ax[:axhline](1; color="black", linestyle="--")
 savefig("performance$(complex ? "_complex" : "").png")
+
+end # module

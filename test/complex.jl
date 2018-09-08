@@ -1,16 +1,33 @@
+module ComplexTests
+using SpecialFunctions, Test
+import ..TestStuff:base_unary_complex, base_binary_complex, randindomain
+using VML
+
 # First generate some random data and test functions in Base on it
 const NVALS = 1000
-input = Dict(t=>[[(randindomain(t, NVALS, domain),) for (fn, domain) in base_unary_complex];
+input = Dict(t=>[[(randindomain(t, NVALS, domain),) for (fn, vfn, vfn!, domain) in base_unary_complex];
              [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
-              for (fn, domain1, domain2) in base_binary_complex];
+              for (fn, vfn, vnf!, domain1, domain2) in base_binary_complex];
              (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-2, 10))[1])]
-            for t in (Complex64, Complex128))
-fns = [[x[1] for x in base_unary_complex]; [x[1] for x in base_binary_complex]; .^]
-output = Dict(t=>[fns[i](input[t][i]...) for i = 1:length(fns)] for t in (Complex64, Complex128))
+            for t in (ComplexF32, ComplexF64))
+fns = [[x[1] for x in base_unary_complex]; [x[1] for x in base_binary_complex]; ^]
+vfns = [[x[2] for x in base_unary_complex]; [x[2] for x in base_binary_complex]; v_pow]
+output = Dict(t=>[fns[i].(input[t][i]...) for i = 1:length(fns)] for t in (ComplexF32, ComplexF64))
 
+@info "Baseline values loaded."
+
+@testset "complex" begin
 # Now test the same data with VML
-using VML
-for t in (Complex64, Complex128), i = 1:length(fns)
-    fn = fns[i]
-    Base.Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "VML $t $fn")
+for t in (ComplexF32, ComplexF64)
+  @testset "$(string(t))" begin
+  for i = 1:length(fns)
+    fn = vfns[i]
+    @testset "$(string(fn))" begin
+        @test fn(input[t][i]...) ≈ output[t][i]
+    end
+    # Base.Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "VML $t $fn")
+  end
+  end
+end
+end
 end
