@@ -42,6 +42,7 @@ function vbench(fns, fns!, input)
         for ifn = 1:length(fns)
             fn = fns[ifn]
             inp = input[t][ifn]
+            # make sure result is appropriate for mutating version
             res = fn(inp...)
             fn! = fns![ifn]
             fn!(res, inp...)
@@ -86,8 +87,8 @@ input = Dict(t=>[[(randindomain(t, NVALS, domain),) for (fn, vfn, vfn!, domain) 
              (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-1, 20))[1])]
             for t in types)
 fns = [[x[1] for x in base_unary]; [x[1] for x in base_binary]; (complex ? [] : ^)]
-vfns = [[x[2] for x in base_unary]; [x[2] for x in base_binary]; (complex ? [] : v_pow)]
-vfns! = [[x[3] for x in base_unary]; [x[3] for x in base_binary]; (complex ? [] : pow!)]
+vfns = [[x[2] for x in base_unary]; [x[2] for x in base_binary]; (complex ? [] : VML.pow)]
+vfns! = [[x[3] for x in base_unary]; [x[3] for x in base_binary]; (complex ? [] : VML.pow!)]
 
 builtin = bench(fns, input)
 

@@ -6,6 +6,10 @@ faster than using Julia's built-in functions.
 
 ## Using VML.jl
 
+Note: **Unlike previous versions, VML.jl no longer exports the vector
+function methods.** Functions must be qualified, e.g. `A = VML.log(B)`.
+This makes the API similar to related packages.
+
 To use VML.jl, you must have the Intel Vector Math Library installed.
 This is included in [MKL](http://software.intel.com/en-us/intel-mkl),
 which is free for non-commercial use. You must also copy/symlink the
@@ -21,8 +25,7 @@ VML.jl may automatically detect CPU architecture.
 
 An earlier version of this package replaced vector methods of some Base
 functions with VML calls. That is not done in this version, since it
-does not fit into the current broadcasting framework. Exported methods
-should not conflict with Base methods.
+does not fit into the current broadcasting framework.
 
 By default, VML uses `VML_HA` mode, which corresponds to an accuracy of
 <1 ulp, matching the accuracy of Julia's built-in openlibm
@@ -55,52 +58,52 @@ log, pow, divide, cis, abs, angle`.
 
 ### Unary functions
 
-Allocating forms have signature `v_f(A)`. Mutating forms have signatures
-`f!(A)` (in place) and `f!(out, A)` (out of place).
-
-Allocating   | Mutating
--------------|---------
-`v_acos`     | `acos!`
-`v_asin`     | `asin!`
-`v_atan`     | `atan!`
-`v_cos`      | `cos!`
-`v_sin`      | `sin!`
-`v_tan`      | `tan!`
-`v_acosh`    | `acosh!`
-`v_asinh`    | `asinh!`
-`v_atanh`    | `atanh!`
-`v_cosh`     | `cosh!`
-`v_sinh`     | `sinh!`
-`v_tanh`     | `tanh!`
-`v_cbrt`     | `cbrt!`
-`v_sqrt`     | `sqrt!`
-`v_exp`      | `expm1!`
-`v_log`      | `log!`
-`v_log10`    | `log10!`
-`v_log1p`    | `log1p!`
-`v_abs`      | `abs!`
-`v_abs2`     | `abs2!`
-`v_ceil`     | `ceil!`
-`v_floor`    | `floor!`
-`v_round`    | `round!`
-`v_trunc`    | `trunc!`
-`v_erf`      | `erf!`
-`v_erfc`     | `erfc!`
-`v_erfinv`   | `erfinv!`
-`v_efcinv`   | `efcinv!`
-`v_inv_cbrt` | `inv_cbrt!`
-`v_inv_sqrt` | `inv_sqrt!`
-`v_pow2o3`   | `pow2o3!`
-`v_pow3o2`   | `pow3o2!`
-
-### Binary functions
-
-Allocating forms have signature `v_f(A, B)`. Mutating forms have
-signature `f!(out, A, B)`.
+Allocating forms have signature `VML.f(A)`. Mutating forms have signatures
+`VML.f!(A)` (in place) and `VML.f!(out, A)` (out of place).
 
 Allocating | Mutating
 -----------|---------
-`v_atan2`  | `atan2!`
-`v_hypot`  | `hypot!`
-`v_pow`    | `pow!`
-`v_divide` | `divide!`
+`acos`     | `acos!`
+`asin`     | `asin!`
+`atan`     | `atan!`
+`cos`      | `cos!`
+`sin`      | `sin!`
+`tan`      | `tan!`
+`acosh`    | `acosh!`
+`asinh`    | `asinh!`
+`atanh`    | `atanh!`
+`cosh`     | `cosh!`
+`sinh`     | `sinh!`
+`tanh`     | `tanh!`
+`cbrt`     | `cbrt!`
+`sqrt`     | `sqrt!`
+`exp`      | `expm1!`
+`log`      | `log!`
+`log10`    | `log10!`
+`log1p`    | `log1p!`
+`abs`      | `abs!`
+`abs2`     | `abs2!`
+`ceil`     | `ceil!`
+`floor`    | `floor!`
+`round`    | `round!`
+`trunc`    | `trunc!`
+`erf`      | `erf!`
+`erfc`     | `erfc!`
+`erfinv`   | `erfinv!`
+`efcinv`   | `efcinv!`
+`inv_cbrt` | `inv_cbrt!`
+`inv_sqrt` | `inv_sqrt!`
+`pow2o3`   | `pow2o3!`
+`pow3o2`   | `pow3o2!`
+
+### Binary functions
+
+Allocating forms have signature `VML.f(A, B)`. Mutating forms have
+signature `VML.f!(out, A, B)`.
+
+Allocating | Mutating
+-----------|---------
+`atan2`    | `atan2!`
+`hypot`    | `hypot!`
+`pow`      | `pow!`
+`divide`   | `divide!`

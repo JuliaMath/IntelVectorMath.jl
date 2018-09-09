@@ -3,71 +3,71 @@ using SpecialFunctions
 using VML
 
 const base_unary_real = (
-    (Base.acos, v_acos, acos!, (-1, 1)),
-    (Base.asin, v_asin, asin!, (-1, 1)),
-    (Base.atan, v_atan, atan!, (-50, 50)),
-    (Base.cos, v_cos, cos!, (-1000, 1000)),
-    (Base.sin, v_sin, sin!, (-1000, 1000)),
-    (Base.tan, v_tan, tan!, (-1000, 1000)),
-    (Base.acosh, v_acosh, acosh!, (1, 1000)),
-    (Base.asinh, v_asinh, asinh!, (-1000, 1000)),
-    (Base.atanh, v_atanh, atanh!, (-1, 1)),
-    (Base.cosh, v_cosh, cosh!, (0, 89.415985f0)),
-    (Base.sinh, v_sinh, sinh!, (-89.415985f0, 89.415985f0)),
-    (Base.tanh, v_tanh, tanh!, (-8.66434f0, 8.66434f0)),
-    (Base.cbrt, v_cbrt, cbrt!, (-1000, 1000)),
-    (Base.sqrt, v_sqrt, sqrt!, (0, 1000)),
-    (Base.exp, v_exp, exp!, (-88.72284f0, 88.72284f0)),
-    (Base.expm1, v_expm1, expm1!, (-88.72284f0, 88.72284f0)),
-    (Base.log, v_log, log!, (0, 1000)),
-    (Base.log10, v_log10, log10!, (0, 1000)),
-    (Base.log1p, v_log1p, log1p!, (-1, 1000)),
-    (Base.abs, v_abs, abs!, (-1000, 1000)),
-    (Base.abs2, v_abs2, abs2!, (-1000, 1000)),
-    (Base.ceil, v_ceil, ceil!, (-1000, 1000)),
-    (Base.floor, v_floor, floor!, (-1000, 1000)),
-    (Base.round, v_round, round!, (-1000, 1000)),
-    (Base.trunc, v_trunc, trunc!, (-1000, 1000)),
-    (SpecialFunctions.erf, v_erf, erf!, (-3.8325067f0, 3.8325067f0)),
-    (SpecialFunctions.erfc, v_erfc, erfc!, (-3.7439213f0, 10.019834f0)),
-    (SpecialFunctions.erfinv, v_erfinv, erfinv!, (-1, 1)),
-    (SpecialFunctions.erfcinv, v_erfcinv, erfcinv!, (0, 2)),
-    (SpecialFunctions.lgamma, v_lgamma, lgamma!, (0, 1000)),
-    (SpecialFunctions.gamma, v_gamma, gamma!, (0, 36))
+    (Base.acos, VML.acos, VML.acos!, (-1, 1)),
+    (Base.asin, VML.asin, VML.asin!, (-1, 1)),
+    (Base.atan, VML.atan, VML.atan!, (-50, 50)),
+    (Base.cos, VML.cos, VML.cos!, (-1000, 1000)),
+    (Base.sin, VML.sin, VML.sin!, (-1000, 1000)),
+    (Base.tan, VML.tan, VML.tan!, (-1000, 1000)),
+    (Base.acosh, VML.acosh, VML.acosh!, (1, 1000)),
+    (Base.asinh, VML.asinh, VML.asinh!, (-1000, 1000)),
+    (Base.atanh, VML.atanh, VML.atanh!, (-1, 1)),
+    (Base.cosh, VML.cosh, VML.cosh!, (0, 89.415985f0)),
+    (Base.sinh, VML.sinh, VML.sinh!, (-89.415985f0, 89.415985f0)),
+    (Base.tanh, VML.tanh, VML.tanh!, (-8.66434f0, 8.66434f0)),
+    (Base.cbrt, VML.cbrt, VML.cbrt!, (-1000, 1000)),
+    (Base.sqrt, VML.sqrt, VML.sqrt!, (0, 1000)),
+    (Base.exp, VML.exp, VML.exp!, (-88.72284f0, 88.72284f0)),
+    (Base.expm1, VML.expm1, VML.expm1!, (-88.72284f0, 88.72284f0)),
+    (Base.log, VML.log, VML.log!, (0, 1000)),
+    (Base.log10, VML.log10, VML.log10!, (0, 1000)),
+    (Base.log1p, VML.log1p, VML.log1p!, (-1, 1000)),
+    (Base.abs, VML.abs, VML.abs!, (-1000, 1000)),
+    (Base.abs2, VML.abs2, VML.abs2!, (-1000, 1000)),
+    (Base.ceil, VML.ceil, VML.ceil!, (-1000, 1000)),
+    (Base.floor, VML.floor, VML.floor!, (-1000, 1000)),
+    (Base.round, VML.round, VML.round!, (-1000, 1000)),
+    (Base.trunc, VML.trunc, VML.trunc!, (-1000, 1000)),
+    (SpecialFunctions.erf, VML.erf, VML.erf!, (-3.8325067f0, 3.8325067f0)),
+    (SpecialFunctions.erfc, VML.erfc, VML.erfc!, (-3.7439213f0, 10.019834f0)),
+    (SpecialFunctions.erfinv, VML.erfinv, VML.erfinv!, (-1, 1)),
+    (SpecialFunctions.erfcinv, VML.erfcinv, VML.erfcinv!, (0, 2)),
+    (SpecialFunctions.lgamma, VML.lgamma, VML.lgamma!, (0, 1000)),
+    (SpecialFunctions.gamma, VML.gamma, VML.gamma!, (0, 36))
 )
 
 const base_binary_real = (
-#    (Base.atan2, v_atan2, atan2!, (-1, 1), (-1, 1)),
-    (Base.hypot, v_hypot, hypot!, (-1000, 1000), (-1000, 1000)),
-#    (getfield(Base, :/), (-1000, 1000), (-1000, 1000)),
-#    (getfield(Base, :^), (0, 100), (-5, 20))
+#    (Base.atan2, VML.atan2, VML.atan2!, (-1, 1), (-1, 1)),
+    (Base.hypot, VML.hypot, VML.hypot!, (-1000, 1000), (-1000, 1000)),
+#    (getfield(Base, :/), VML.divide, VML.divide!, (-1000, 1000), (-1000, 1000)),
+#    (getfield(Base, :^), VML.pow, VML.pow!, (0, 100), (-5, 20))
 )
 
 const base_unary_complex = (
-    (Base.acos, v_acos, acos!, (-1, 1)),
-    (Base.asin, v_asin, asin!, (-1, 1)),
-    # (Base.atan, v_atan, atan!, (-50, 50)),
-    # (Base.cos, v_cos, cos!, (-10, 10)),
-    # (Base.sin, v_sin, sin!, (-10, 10)),
-    # (Base.tan, v_tan, tan!, (-10, 10)),
-    (Base.acosh, v_acosh, acosh!, (1, 1000)),
-    (Base.asinh, v_asinh, asinh!, (-1000, 1000)),
-    # (Base.atanh, v_atanh, atanh!, (-1, 1)),
-    # (Base.cosh, v_cosh, cosh!, (0, 89.415985f0)),
-    # (Base.sinh, v_sinh, sinh!, (-89.415985f0, 89.415985f0)),
-    # (Base.tanh, v_tanh, tanh!, (-8.66434f0, 8.66434f0)),
-    (Base.sqrt, v_sqrt, sqrt!, (0, 1000)),
-    (Base.exp, v_exp, exp!, (-88.72284f0, 88.72284f0)),
-    (Base.log, v_log, log!, (0, 1000)),
-    # (Base.log10, v_log10, log10!, (0, 1000)),
-    (Base.abs, v_abs, abs!, (-1000, 1000)),
-    (Base.angle, v_angle, angle!, (-1000, 1000))
-    # (Base.conj, v_conj, conj!, (-1000, 1000))
+    (Base.acos, VML.acos, VML.acos!, (-1, 1)),
+    (Base.asin, VML.asin, VML.asin!, (-1, 1)),
+    # (Base.atan, VML.atan, VML.atan!, (-50, 50)),
+    # (Base.cos, VML.cos, VML.cos!, (-10, 10)),
+    # (Base.sin, VML.sin, VML.sin!, (-10, 10)),
+    # (Base.tan, VML.tan, VML.tan!, (-10, 10)),
+    (Base.acosh, VML.acosh, VML.acosh!, (1, 1000)),
+    (Base.asinh, VML.asinh, VML.asinh!, (-1000, 1000)),
+    # (Base.atanh, VML.atanh, VML.atanh!, (-1, 1)),
+    # (Base.cosh, VML.cosh, VML.cosh!, (0, 89.415985f0)),
+    # (Base.sinh, VML.sinh, VML.sinh!, (-89.415985f0, 89.415985f0)),
+    # (Base.tanh, VML.tanh, VML.tanh!, (-8.66434f0, 8.66434f0)),
+    (Base.sqrt, VML.sqrt, VML.sqrt!, (0, 1000)),
+    (Base.exp, VML.exp, VML.exp!, (-88.72284f0, 88.72284f0)),
+    (Base.log, VML.log, VML.log!, (0, 1000)),
+    # (Base.log10, VML.log10, VML.log10!, (0, 1000)),
+    (Base.abs, VML.abs, VML.abs!, (-1000, 1000)),
+    (Base.angle, VML.angle, VML.angle!, (-1000, 1000))
+    # (Base.conj, VML.conj, VML.conj!, (-1000, 1000))
 )
 
 const base_binary_complex = (
-#    (getfield(Base, :/), (-1000, 1000), (-1000, 1000)),
-    # (Base.(:.^), (0, 100), (-2, 10))
+    # (getfield(Base, :/), VML.divide, VML.divide!, (-1000, 1000), (-1000, 1000)),
+    # (getfield(Base,:^, VML.pow, VML.pow!, (0, 100), (-2, 10))
 )
 
 function randindomain(t::Type{T}, n, domain) where T<:Real
