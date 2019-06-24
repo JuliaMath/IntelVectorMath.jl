@@ -8,7 +8,7 @@ faster than using Julia's built-in functions.
 
 To use VML.jl, you must have the Intel Vector Math Library installed.
 This is included in [MKL](http://software.intel.com/en-us/intel-mkl),
-which is free for non-commercial use. You must also copy/symlink the
+which is free for commercial and non-commercial use. You must also copy/symlink the
 appropriate shared library to a directory known to the linker (e.g.
 `/usr/local/lib`) or you must modify the path to `lib` in `src/VML.jl`.
 
