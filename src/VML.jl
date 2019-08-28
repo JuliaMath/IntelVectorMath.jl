@@ -1,12 +1,16 @@
 module VML
 
-import Base: .^, ./
+# import Base: .^, ./
+using Libdl
 
 # TODO detect CPU architecture
 const lib = :libmkl_vml_avx
-Libdl.dlopen(:libmkl_rt)
+# Libdl.dlopen(:libmkl_rt)
+Libdl.dlopen(:libmkl_rt, RTLD_LAZY|RTLD_DEEPBIND|RTLD_GLOBAL )
 
-immutable VMLAccuracy
+Libdl.dlopen(:libmkl_core, RTLD_LAZY|RTLD_DEEPBIND|RTLD_GLOBAL ) #only needed on mac?
+
+struct VMLAccuracy
     mode::UInt
 end
 const VML_LA = VMLAccuracy(0x00000001)
@@ -53,58 +57,63 @@ end
 function def_unary_op(tin, tout, jlname, jlname!, mklname)
     mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
     exports = Symbol[]
-    isa(jlname, Expr) || push!(exports, jlname)
-    isa(jlname!, Expr) || push!(exports, jlname!)
+#    isa(jlname, Expr) || push!(exports, jlname)
+    (@isdefined jlname) || push!(exports, jlname)
+#    isa(jlname!, Expr) || push!(exports, jlname!)
+    (@isdefined jlname!) || push!(exports, jlname!)
+    display(jlname!)
     @eval begin
-        $(isempty(exports) ? nothing : Expr(:export, exports...))
-        function $(jlname!){N}(out::Array{$tout,N}, A::Array{$tin,N})
+        function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}) where {N}
             size(out) == size(A) || throw(DimensionMismatch())
-            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
-            out
+            return out
         end
         $(if tin == tout
             quote
                 function $(jlname!)(A::Array{$tin})
-                    ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
+                    ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
                     vml_check_error()
-                    A
+                    return A
                 end
             end
         end)
-        function $(jlname)(A::Array{$tin})
+        function ($jlname)(A::Array{$tin})
             out = similar(A, $tout)
-            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
-            out
+            return out
         end
+        $(isempty(exports) ? nothing : Expr(:export, exports...))
     end
 end
 
 function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
     mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
     exports = Symbol[]
-    isa(jlname, Expr) || push!(exports, jlname)
-    isa(jlname!, Expr) || push!(exports, jlname!)
+#    isa(jlname, Expr) || push!(exports, jlname)
+    (@isdefined jlname) || push!(exports, jlname)
+#    isa(jlname!, Expr) || push!(exports, jlname!)
+    (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
-        function $(jlname!){N}(out::Array{$tout,N}, A::Array{$tin,N}, B::Array{$tin,N})
+        function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}, B::Array{$tin,N}) where {N}
             size(out) == size(A) == size(B) || $(broadcast ? :(return broadcast!($jlname, out, A, B)) : :(throw(DimensionMismatch())))
-            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             out
         end
-        function $(jlname){N}(A::Array{$tout,N}, B::Array{$tin,N})
+        function ($jlname)(A::Array{$tout,N}, B::Array{$tin,N}) where {N}
             size(A) == size(B) || $(broadcast ? :(return broadcast($jlname, A, B)) : :(throw(DimensionMismatch())))
             out = similar(A)
-            ccall(($mklfn, lib), Void, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             out
         end
     end
 end
 
-for t in (Float32, Float64, Complex64, Complex128)
+for t in (Float32, Float64, ComplexF32, ComplexF64)
     # Unary, real or complex
     def_unary_op(t, t, :(Base.acos), :acos!, :Acos)
     def_unary_op(t, t, :(Base.asin), :asin!, :Asin)
@@ -114,9 +123,9 @@ for t in (Float32, Float64, Complex64, Complex128)
     def_unary_op(t, t, :(Base.exp), :exp!, :Exp)
     def_unary_op(t, t, :(Base.log), :log!, :Ln)
 
-    # Binary, real or complex
-    def_binary_op(t, t, :(.^), :pow!, :Pow, true)
-    def_binary_op(t, t, :(./), :divide!, :Div, true)
+    # # Binary, real or complex
+    # def_binary_op(t, t, :(.^), :pow!, :Pow, true)
+    # def_binary_op(t, t, :(./), :divide!, :Div, true)
 end
 
 for t in (Float32, Float64)
@@ -130,12 +139,14 @@ for t in (Float32, Float64)
     def_unary_op(t, t, :(Base.floor), :floor!, :Floor)
     def_unary_op(t, t, :(Base.round), :round!, :Round)
     def_unary_op(t, t, :(Base.trunc), :trunc!, :Trunc)
-    def_unary_op(t, t, :(Base.erf), :erf!, :Erf)
-    def_unary_op(t, t, :(Base.erfc), :erfc!, :Erfc)
-    def_unary_op(t, t, :(Base.erfinv), :erfinv!, :ErfInv)
-    def_unary_op(t, t, :(Base.erfcinv), :erfcinv!, :ErfcInv)
-    def_unary_op(t, t, :(Base.lgamma), :lgamma!, :LGamma)
-    def_unary_op(t, t, :(Base.gamma), :gamma!, :TGamma)
+
+    # now in SpecialFunctions (make smart, maybe?)
+    # def_unary_op(t, t, :(Base.erf), :erf!, :Erf)
+    # def_unary_op(t, t, :(Base.erfc), :erfc!, :Erfc)
+    # def_unary_op(t, t, :(Base.erfinv), :erfinv!, :ErfInv)
+    # def_unary_op(t, t, :(Base.erfcinv), :erfcinv!, :ErfcInv)
+    # def_unary_op(t, t, :(Base.lgamma), :lgamma!, :LGamma)
+    # def_unary_op(t, t, :(Base.gamma), :gamma!, :TGamma)
     # Not in Base
     def_unary_op(t, t, :inv_cbrt, :inv_cbrt!, :InvCbrt)
     def_unary_op(t, t, :inv_sqrt, :inv_sqrt!, :InvSqrt)
@@ -154,27 +165,27 @@ for t in (Float32, Float64)
     def_unary_op(t, t, :(Base.tanh), :tanh!, :Tanh)
     def_unary_op(t, t, :(Base.log10), :log10!, :Log10)
 
-    # .^ to scalar power
-    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(t))Powx"))
-    @eval begin
-        export pow!
-        function pow!{N}(out::Array{$t,N}, A::Array{$t,N}, b::$t)
-            size(out) == size(A) || throw(DimensionMismatch())
-            ccall(($mklfn, lib), Void, (Int, Ptr{$t}, $t, Ptr{$t}), length(A), A, b, out)
-            vml_check_error()
-            out
-        end
-        function (.^){N}(A::Array{$t,N}, b::$t)
-            out = similar(A)
-            ccall(($mklfn, lib), Void, (Int, Ptr{$t}, $t, Ptr{$t}), length(A), A, b, out)
-            vml_check_error()
-            out
-        end
-    end
+    # # .^ to scalar power
+    # mklfn = Base.Meta.quot(Symbol("$(vml_prefix(t))Powx"))
+    # @eval begin
+    #     export pow!
+    #     function pow!{N}(out::Array{$t,N}, A::Array{$t,N}, b::$t)
+    #         size(out) == size(A) || throw(DimensionMismatch())
+    #         ccall(($mklfn, lib), Nothing, (Int, Ptr{$t}, $t, Ptr{$t}), length(A), A, b, out)
+    #         vml_check_error()
+    #         out
+    #     end
+    #     function (.^){N}(A::Array{$t,N}, b::$t)
+    #         out = similar(A)
+    #         ccall(($mklfn, lib), Nothing, (Int, Ptr{$t}, $t, Ptr{$t}), length(A), A, b, out)
+    #         vml_check_error()
+    #         out
+    #     end
+    # end
 
-    # Binary, real-only
-    def_binary_op(t, t, :(Base.atan2), :atan2!, :Atan2, false)
-    def_binary_op(t, t, :(Base.hypot), :hypot!, :Hypot, false)
+    # # Binary, real-only
+    # def_binary_op(t, t, :(Base.atan2), :atan2!, :Atan2, false)
+    # def_binary_op(t, t, :(Base.hypot), :hypot!, :Hypot, false)
 
     # Unary, complex-only
     def_unary_op(t, Complex{t}, :(Base.cis), :cis!, :CIS)
