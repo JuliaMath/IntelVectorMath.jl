@@ -4,11 +4,16 @@ module VML
 using Libdl
 
 # TODO detect CPU architecture
-const lib = :libmkl_vml_avx
+const lib = :libmkl_vml_avx2
 # Libdl.dlopen(:libmkl_rt)
-Libdl.dlopen(:libmkl_rt, RTLD_LAZY|RTLD_DEEPBIND|RTLD_GLOBAL )
 
-Libdl.dlopen(:libmkl_core, RTLD_LAZY|RTLD_DEEPBIND|RTLD_GLOBAL ) #only needed on mac?
+function __init__()
+    Libdl.dlopen(:libmkl_rt, RTLD_LAZY|RTLD_DEEPBIND|RTLD_GLOBAL )
+    Libdl.dlopen(:libmkl_core, RTLD_LAZY|RTLD_DEEPBIND|RTLD_GLOBAL ) #only needed on mac?
+    Libdl.dlopen(lib)
+end
+
+__init__()
 
 struct VMLAccuracy
     mode::UInt
@@ -61,7 +66,6 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname)
     (@isdefined jlname) || push!(exports, jlname)
 #    isa(jlname!, Expr) || push!(exports, jlname!)
     (@isdefined jlname!) || push!(exports, jlname!)
-    display(jlname!)
     @eval begin
         function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}) where {N}
             size(out) == size(A) || throw(DimensionMismatch())
@@ -204,4 +208,5 @@ for t in (Float32, Float64)
 end
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
+
 end
