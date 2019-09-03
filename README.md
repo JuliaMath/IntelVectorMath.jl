@@ -7,16 +7,15 @@ faster than using Julia's built-in functions.
 ## Using VML.jl
 
 To use VML.jl, you must have the Intel Vector Math Library installed.
-This is included in [MKL](http://software.intel.com/en-us/intel-mkl),
-which is free for non-commercial use. You must also copy/symlink the
-appropriate shared library to a directory known to the linker (e.g.
-`/usr/local/lib`) or you must modify the path to `lib` in `src/VML.jl`.
+For this you have two options. First, you can install (and build) [MKL.jl](https://github.com/JuliaComputing/MKL.jl), which will add the necessary libraries to your Julia install. This will change you Julia system image however, so if you would prefer not to do that you can get the stand-alone [MKL](http://software.intel.com/en-us/intel-mkl),
+which is free for non-commercial use. The default install location will be detected automatically (currently only `opt/intel/mkl/lib` on Unix). If you have chosen a different location or have multiple versions of MKL, you can also specify the environmental variable 
+```
+    ENV["MKL_SL"] = <.../lib>
+```
+This folder should contain `libmkl_rt`, `libmkl_core` and `libmkl_vml_avx` or `libmkl_vml_avx2`, with file ending appropriate for your operating system. 
+The definition of `ENV["MKL_SL"]` will take precedence even if `MKL.jl` or default standalone MKL are installed. 
 
-Currently, VML.jl is configured to use `libmkl_vml_avx`, which requires
-AVX support. If your system does not have AVX (e.g., most pre-Sandy
-Bridge systems), you will need to modify the `const lib` declaration at
-the top of `src/VML.jl`. Future versions of VML.jl may automatically
-detect CPU architecture.
+Using the beta-stage [CpuId.jl](https://github.com/m-j-w/CpuId.jl) VML.jl detects if your processor supports the newer `avx2` instructions, and if not default to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
 
 After loading VML.jl, vector calls to functions listed below will
 automatically use VML instead of openlibm when possible.
@@ -30,7 +29,7 @@ regarding these options is available on
 [Intel's website](http://software.intel.com/sites/products/documentation/hpc/mkl/vml/vmldata.htm).
 
 ## Performance
-
+(These results are currently outdated will be updated in due course)
 ![VML Performance Comparison](/benchmark/performance.png)
 
 ![VML Complex Performance Comparison](/benchmark/performance_complex.png)
@@ -50,7 +49,7 @@ these are not yet implemented in VML.jl.
 ### Unary functions
 
 Allocating forms have signature `f(A)`. Mutating forms have signatures
-`f!(A)` (in place) and `f!(out, A)` (out of place).
+`f!(A)` (in place) and `f!(out, A)` (out of place). The last 9 functions have been moved from Base to `SpecialFunctions.jl` or have not Base equivalent. 
 
 Allocating | Mutating
 -----------|---------
@@ -82,6 +81,8 @@ Allocating | Mutating
 `erfc`     | `erfc!`
 `erfinv`   | `erfinv!`
 `efcinv`   | `efcinv!`
+`gamma`    | `gamma!`
+`lgamma`   | `lgamma!`
 `inv_cbrt` | `inv_cbrt!`
 `inv_sqrt` | `inv_sqrt!`
 `pow2o3`   | `pow2o3!`
@@ -97,5 +98,9 @@ Allocating | Mutating
 -----------|---------
 `atan2`    | `atan2!`
 `hypot`    | `hypot!`
-`.^`       | `pow!`
-`./`       | `divide!`
+`pow`       | `pow!`
+`divide`       | `divide!`
+
+
+### Next steps
+Next steps for this package are proper Windows support, writing up proper testing to make sure each advertised function actually works as expected and build testing on travis.
