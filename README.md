@@ -1,24 +1,27 @@
 # VML
 
 This package provides bindings to the Intel Vector Math Library for
-arithmetic and transcendental functions. It is often substantially
-faster than using Julia's built-in functions.
+arithmetic and transcendental functions. Especially for large vectors it is often substantially faster than broadcasting Julia's built-in functions.
 
-## Using VML.jl
+## Setting up VML.jl
 
 To use VML.jl, you must have the Intel Vector Math Library installed.
-For this you have two options. First, you can install (and build) [MKL.jl](https://github.com/JuliaComputing/MKL.jl), which will add the necessary libraries to your Julia install. This will change you Julia system image however, so if you would prefer not to do that you can get the stand-alone [MKL](http://software.intel.com/en-us/intel-mkl),
+For this you have two options. First, you can install (and build) [MKL.jl](https://github.com/JuliaComputing/MKL.jl), which will add the necessary libraries to your Julia install. This will change your Julia system image however, so if you would prefer not to do that you can get the stand-alone [MKL](http://software.intel.com/en-us/intel-mkl),
 which is free for non-commercial use. The default install location will be detected automatically (currently only `opt/intel/mkl/lib` on Unix). If you have chosen a different location or have multiple versions of MKL, you can also specify the environmental variable 
 ```
     ENV["MKL_SL"] = <.../lib>
 ```
-This folder should contain `libmkl_rt`, `libmkl_core` and `libmkl_vml_avx` or `libmkl_vml_avx2`, with file ending appropriate for your operating system. 
+The specified folder should contain `libmkl_rt`, `libmkl_core` and `libmkl_vml_avx` or `libmkl_vml_avx2`, with file endings appropriate for your operating system. 
 The definition of `ENV["MKL_SL"]` will take precedence even if `MKL.jl` or default standalone MKL are installed. 
 
-Using the beta-stage [CpuId.jl](https://github.com/m-j-w/CpuId.jl) VML.jl detects if your processor supports the newer `avx2` instructions, and if not default to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
+Using [CpuId.jl](https://github.com/m-j-w/CpuId.jl) VML.jl detects if your processor supports the newer `avx2` instructions, and if not default to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
+
+If any of this detection does not work for you, please let me know. 
+
+## Using VML.jl
 
 After loading VML.jl, vector calls to functions listed below will
-automatically use VML instead of openlibm when possible.
+automatically use VML instead of openlibm when possible. Note that most function currently do not have a vectorized version (e.g. you call `sin.(rand(300))`), so there should be no conflict. If there is let me know. Updated and conflict tested exported functions are planned for the future.
 
 By default, VML uses `VML_HA` mode, which corresponds to an accuracy of
 <1 ulp, matching the accuracy of Julia's built-in openlibm
