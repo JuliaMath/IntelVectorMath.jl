@@ -14,9 +14,9 @@ which is free for non-commercial use. The default install location will be detec
 The specified folder should contain `libmkl_rt`, `libmkl_core` and `libmkl_vml_avx` or `libmkl_vml_avx2`, with file endings appropriate for your operating system. 
 The definition of `ENV["MKL_SL"]` will take precedence even if `MKL.jl` or default standalone MKL are installed. 
 
-Using [CpuId.jl](https://github.com/m-j-w/CpuId.jl) VML.jl detects if your processor supports the newer `avx2` instructions, and if not default to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
+Using [CpuId.jl](https://github.com/m-j-w/CpuId.jl), VML.jl detects if your processor supports the newer `avx2` instructions, and if not default to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
 
-If any of this detection does not work for you, please let me know. 
+If the CPU feature detection does not work for you, please open an issue. 
 
 ## Using VML.jl
 
@@ -52,7 +52,7 @@ these are not yet implemented in VML.jl.
 ### Unary functions
 
 Allocating forms have signature `f(A)`. Mutating forms have signatures
-`f!(A)` (in place) and `f!(out, A)` (out of place). The last 9 functions have been moved from Base to `SpecialFunctions.jl` or have not Base equivalent. 
+`f!(A)` (in place) and `f!(out, A)` (out of place). The last 9 functions have been moved from Base to `SpecialFunctions.jl` or have no Base equivalent. 
 
 Allocating | Mutating
 -----------|---------
