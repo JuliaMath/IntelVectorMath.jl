@@ -82,7 +82,7 @@ for t in (Float32, Float64)
     # end
 
     # # Binary, real-only
-    def_binary_op(t, t, :(Base.atan), :atan!, :Atan, false)
+    def_binary_op(t, t, :(Base.atan), :atan!, :Atan2, false)
     def_binary_op(t, t, :(Base.hypot), :hypot!, :Hypot, false)
 
     # Unary, complex-only
