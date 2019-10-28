@@ -2,69 +2,18 @@
 using CpuId
 using Libdl
 
-
-function defMKLpath()
-    if Sys.isunix()
-        return "/opt/intel/mkl/lib"
-    # elseif Sys.iswindows()
-    #     return
-    else
-        return ""
-    end
-end
-        
-
-
-### First Option, check for user preference
-if haskey(ENV, "MKL_SL") 
-    basepath = ENV["MKL_SL"]
-    if !any([occursin("libmkl_rt",x) for x in readdir(basepath)])
-        error(""" ENV["MKL_SL"] is set, but does not point to folder containing MKL files """)
-    end
-    println("""Found MKL via ENV["MKL_SL"]
-    basepath set to $basepath""")
-    
-### Next, check if MKL.jl is already installed. 
-# Don't want to add to deps, so bit hacky
-else
-    foundMKLjl = [isdir(joinpath(testdir, "packages/MKL")) for testdir in DEPOT_PATH]
-
-    if any(foundMKLjl)
-        pkgPath = joinpath(DEPOT_PATH[findfirst(foundMKLjl)], "packages/MKL/")
-
-        shortID = readdir(pkgPath)[1]
-
-        basepath = joinpath(pkgPath, shortID, "deps/usr/lib")
-        
-        if isdir(basepath)
-            println("Found MKL.jl package
-            basepath set to $basepath")
-        else
-            error("Found MKL package folder, but MKL libraries at deps/usr/lib are missing
-            Please rebuild MKL")
-        end
-
-    elseif isdir(defMKLpath())
-        basepath = defMKLpath()
-
-    else
-        error("Could not find VML shared libraries
-            Check github.com/.... for details on obtaining them")
-
-    end
-end
-
+## this lets us load CpuId only once 
 
 if cpufeature(:AVX2)
-    lib = joinpath(basepath, "libmkl_vml_avx2")
+    lib = :libmkl_vml_avx2
     println("AVX2 support detected, vml_avx2 selected")
 else
-    lib = joinpath(basepath, "libmkl_vml_avx")
+    lib = :libmkl_vml_avx
     println("AVX2 support missing, vml_avx selected")
 end
 
-rtlib = joinpath(basepath, "libmkl_rt")
-corelib = joinpath(basepath, "libmkl_core")
+rtlib = :libmkl_rt
+corelib = :libmkl_core
 
 
 depsjl_path = joinpath(@__DIR__, "deps.jl")
@@ -74,8 +23,8 @@ open(depsjl_path, "w") do depsjl_file
         ## Do not edit.
         import Libdl
 
-        const lib = "$lib"
-        const rtlib = "$rtlib"
-        const corelib = "$corelib"
+        const lib = :$lib
+        const rtlib = :$rtlib
+        const corelib = :$corelib
         """))
 end
