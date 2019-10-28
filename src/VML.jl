@@ -86,7 +86,6 @@ for t in (Float32, Float64)
     def_binary_op(t, t, :(Base.hypot), :hypot!, :Hypot, false)
 
     # Unary, complex-only
-    def_unary_op(t, Complex{t}, :(Base.cis), :cis!, :CIS)
     def_unary_op(Complex{t}, Complex{t}, :(Base.conj), :conj!, :Conj)
     def_unary_op(Complex{t}, t, :(Base.abs), :abs!, :Abs)
     def_unary_op(Complex{t}, t, :(Base.angle), :angle!, :Arg)

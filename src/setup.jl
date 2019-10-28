@@ -29,7 +29,7 @@ function vml_check_error()
     vml_error = ccall((:_vmlClearErrStatus, lib), Cint, ())
     if vml_error != 0
         if vml_error == 1
-            throw(DomainError())
+            throw(DomainError(-1, "This function does not support arguments outside its domain"))
         elseif vml_error == 2 || vml_error == 3 || vml_error == 4
             # Singularity, overflow, or underflow
             # I don't think Base throws on these
