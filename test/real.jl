@@ -44,3 +44,16 @@ end
   Test.@test vml_get_accuracy() == VML_EP
 
 end
+
+@testset "@overload macro" begin
+
+    @test VML.exp([1.0]) ≈ exp.([1.0])
+    @test_throws MethodError Base.exp([1.0])
+    @test (@overload log exp) isa String
+    @test Base.exp([1.0]) ≈ exp.([1.0])
+
+    @test_throws MethodError Base.atan([1.0], [2.0])
+    @test (@overload atan) isa String
+    @test Base.atan([1.0], [2.0]) ≈ atan.([1.0], [2.0])
+
+end
