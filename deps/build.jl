@@ -5,15 +5,22 @@ using Libdl
 ## this lets us load CpuId only once 
 
 if cpufeature(:AVX2)
-    lib = :libmkl_vml_avx2
+    libsuffix = :avx2
     println("AVX2 support detected, vml_avx2 selected")
 else
-    lib = :libmkl_vml_avx
+    libsuffix = :avx
     println("AVX2 support missing, vml_avx selected")
 end
 
-rtlib = :libmkl_rt
-corelib = :libmkl_core
+if Sys.iswindows()
+    rtlib = :mkl_rt
+    corelib = :mkl_core
+    lib = Symbol(:mkl_vml_, libsuffix)
+else
+    rtlib = :libmkl_rt
+    corelib = :libmkl_core
+    lib = Symbol(:libmkl_vml_, libsuffix)
+end
 
 
 depsjl_path = joinpath(@__DIR__, "deps.jl")
