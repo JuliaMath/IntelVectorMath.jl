@@ -103,17 +103,41 @@ end
 """
     @overload exp log sin
 
-This macro adds a method to each function, so that when acting on an array,
-it calls the `VML` version. The existing action on scalars is unaffected.
-
-That is, it defines  `Base.exp(A::AbstractArray) = VML.exp(A)` etc,
-while leaving `exp.(A)` alone.
+This macro adds a method to each function, so that when acting on an array
+(or two arrays) it calls the `VML` version. The existing action on scalars is unaffected.
 """
 macro overload(funs...)
-    defs = [:( Base.$f(A::AbstractArray) = VML.$f(A) ) for f in funs ]
-    esc(Expr(:block, defs...))
+    out = quote end
+    say = []
+    for f in funs
+        if f in _UNARY
+            if isdefined(Base, f)
+                push!(out.args, :( Base.$f(A::Array) = VML.$f(A) ))
+                push!(say, "Base.$f(A)")
+            elseif isdefined(SpecialFunctions, f)
+                push!(out.args, :( VML.SpecialFunctions.$f(A::Array) = VML.$f(A) ))
+                push!(say, "SpecialFunctions.$f(A)")
+            else
+                @error "function VML.$f is not defined in Base or SpecialFunctions, so there is nothing to overload"
+            end
+        end
+        if f in _BINARY
+            if isdefined(Base, f)
+                push!(out.args, :( Base.$f(A::Array, B::Array) = VML.$f(A, B) ))
+                push!(say, "Base.$f(A, B)")
+            else
+                @error "function VML.$f is not defined in Base, so there is nothing to overload"
+            end
+        end
+        if !(f in _UNARY) && !(f in _BINARY)
+            error("there is no function $f defined by VML.jl")
+        end
+    end
+    str = string("Overloaded these functions: \n  ", join(say, " \n  "))
+    push!(out.args, str)
+    esc(out)
 end
 
-export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
+export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy, @overload
 
 end
