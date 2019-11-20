@@ -3,6 +3,9 @@ function __init__()
     Libdl.dlopen(rtlib, RTLD_GLOBAL)
     Libdl.dlopen(corelib, RTLD_GLOBAL) # maybe only needed on mac
     Libdl.dlopen(lib, RTLD_GLOBAL)
+    if addlibpath
+        push!(Libdl.DL_LOAD_PATH, libpath)
+    end
 end
 
 __init__()
