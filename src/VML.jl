@@ -103,8 +103,11 @@ end
 """
     @overload exp log sin
 
-This macro adds a method to each function, so that when acting on an array
-(or two arrays) it calls the `VML` version. The existing action on scalars is unaffected.
+This macro adds a method to each function in `Base` (or perhaps in `SpecialFunctions`), 
+so that when acting on an array (or two arrays) it calls the `VML` function of the same name.
+
+The existing action on scalars is unaffected. However, `exp(M::Matrix)` will now mean
+element-wise `VML.exp(M) == exp.(M)` rather then matrix exponentiation.
 """
 macro overload(funs...)
     out = quote end
