@@ -1,11 +1,13 @@
 
 function __init__()
+    for mklpath in [Base.find_package("MKL")]
+        libpath = normpath(joinpath(dirname(mklpath), "../deps/usr/lib"))
+        push!(Libdl.DL_LOAD_PATH, libpath)
+    end
+
     Libdl.dlopen(rtlib, RTLD_GLOBAL)
     Libdl.dlopen(corelib, RTLD_GLOBAL) # maybe only needed on mac
     Libdl.dlopen(lib, RTLD_GLOBAL)
-    if addlibpath
-        push!(Libdl.DL_LOAD_PATH, libpath)
-    end
 end
 
 __init__()

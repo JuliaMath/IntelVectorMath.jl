@@ -12,21 +12,11 @@ else
     println("AVX2 support missing, vml_avx selected")
 end
 
-addlibpath = false
-
 if Sys.iswindows()
     rtlib = :mkl_rt
     corelib = :mkl_core
     lib = Symbol(:mkl_vml_, libsuffix)
 else
-    try
-        using MKL
-        mklpath = Base.pathof(MKL)
-        libpath = normpath(joinpath(dirname(mklpath), "../deps/usr/lib"))
-        addlibpath = true
-    catch
-        println("MKL.jl not found")
-    end
     rtlib = :libmkl_rt
     corelib = :libmkl_core
     lib = Symbol(:libmkl_vml_, libsuffix)
@@ -43,11 +33,5 @@ open(depsjl_path, "w") do depsjl_file
         const lib = :$lib
         const rtlib = :$rtlib
         const corelib = :$corelib
-        const addlibpath = :$addlibpath
         """))
-    if addlibpath
-        println(depsjl_file, strip("""
-        const libpath = :$libpath
-        """))
-    end
 end

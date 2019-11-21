@@ -5,8 +5,6 @@ module VML
 # import Base: .^, ./
 using SpecialFunctions
 using Libdl
-# TODO detect CPU architecture
-# include("libdetect.jl")
 include(joinpath(dirname(@__DIR__), "deps/deps.jl"))
 
 include("setup.jl")
