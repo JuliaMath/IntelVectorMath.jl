@@ -8,6 +8,11 @@ julia:
   - 1.0
   - nightly
 
+branches:
+  only:
+  - master
+  - TravisTesting
+
 before_script:
   # Every 30 seconds, look for the build log file. If it exists, then
   # start watching its contents and printing them to stdout as they
