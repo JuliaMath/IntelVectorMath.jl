@@ -3,14 +3,14 @@ const NVALS = 1000
 
 input = Dict(
     t=>[
-        [ (randindomain(t, NVALS, domain),) for (_, domain) in base_unary_real ];
+        [ (randindomain(t, NVALS, domain),) for (_, _, domain) in base_unary_real ];
         [ (randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
-            for (_, domain1, domain2) in base_binary_real ]
+            for (_, _, domain1, domain2) in base_binary_real ]
     ]
     for t in (Float32, Float64)
 )
 
-fns = [[x[1] for x in base_unary_real]; [x[1] for x in base_binary_real]]
+fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_real]]
 
 # output = Dict(t=>[fns[i](input[t][i]...) for i = 1:length(fns)] for t in (Float32, Float64))
 
@@ -18,8 +18,8 @@ fns = [[x[1] for x in base_unary_real]; [x[1] for x in base_binary_real]]
 
   for t in (Float32, Float64), i = 1:length(fns)
 
-    base_fn = fns[i]
-    vml_fn = eval(:(VML.$(Symbol(base_fn))))
+    base_fn = eval(:($(fns[i][1]).$(fns[i][2]))) 
+    vml_fn = eval(:(VML.$(fns[i][2])))
 
     Test.@test which(vml_fn, typeof(input[t][i])).module == VML
 
