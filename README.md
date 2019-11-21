@@ -3,23 +3,56 @@
 This package provides bindings to the Intel Vector Math Library for
 arithmetic and transcendental functions. Especially for large vectors it is often substantially faster than broadcasting Julia's built-in functions.
 
-## Setting up VML.jl
+## Basic install
 
-To use VML.jl, you must have the Intel Vector Math Library installed.
-For this you have two options. First, you can install (and build) [MKL.jl](https://github.com/JuliaComputing/MKL.jl), which will add the necessary libraries to your Julia install. This will change your Julia system image however, so if you would prefer not to do that you can get the stand-alone [MKL](http://software.intel.com/en-us/intel-mkl),
-which is free for non-commercial use. 
+To use VML.jl, you must have the shared libraries of the Intel Vector Math Library avilable on your system.
+The easiest option is to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl) via 
+```
+julia> ] add https://github.com/JuliaComputing/MKL.jl.git
+```
+Alternatively you can install MKL directly [from intel](https://software.intel.com/en-us/mkl/choose-download).
 
-Libdl automatically finds the relevant libraries in the default search locations. This already the case if you use MKL.jl, but the stand-alone may require you to source `mklvars.sh`. The default command on Mac and Ubuntu is `source /opt/intel/mkl/bin/mklvars.sh intel64`. You may want to add this to your `.bashrc`. 
-Adding a new `*.conf` file in `/etc/ld.so.conf.d` also works, as the `intel-mkl-slim` package in the AUR does automatically. 
+Note that intel MKL has a separate license, which you may want to check for commercial projects (see [FAQ]( https://software.intel.com/en-us/mkl/license-faq)).
 
-Using [CpuId.jl](https://github.com/m-j-w/CpuId.jl), VML.jl detects if your processor supports the newer `avx2` instructions, and if not default to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
+To install VML.jl run 
+```
+julia> ] add https://github.com/Crown421/VML.jl
+```
 
-If the CPU feature detection does not work for you, please open an issue. 
+## Using VML
+After loading `VML`, you have the supported function listed below available to call, i.e. `VML.sin(rand(100))`. This should provide a significant speed-up over broadcasting the Base functions.
+```
+julia> using VML
+julia> a = rand(10000);
+julia>@time  sin.(a);                 
+0.159878 seconds (583.25 k allocations: 30.720 MiB, 2.78% gc time)
+julia> @time VML.sin(a);                                                                                
+0.000465 seconds (6 allocations: 781.484 KiB) 
+```
 
-## Using VML.jl
+Most function do currently (julia 1.x) not have a vectorized form, meaning that i.e. `sin(rand(10))` will not work.  If you would like to extend the Base function with this functionality you can overload them with the `@overload` macro:
+```
+julia> @overload sin
+julia> @time sin(a);                                                                                
+0.000485 seconds (6 allocations: 781.484 KiB) 
+```
+Note the lack of the broadcasting dot`.` Now calling i.e. `sin` with an array as input will call the VML functions. 
 
-After loading VML.jl, vector calls to functions listed below will
-automatically use VML instead of openlibm when possible. Note that most function currently do not have a vectorized version (e.g. you call `sin.(rand(300))`), so there should be no conflict. If there is let me know. Updated and conflict tested exported functions are planned for the future.
+#### Note:
+Some functions like `exp` and `log` do operate on matrices from Base and refer to the [matrix exponential](https://en.wikipedia.org/wiki/Matrix_exponential) and logarithm. Using `@overload exp` will overwrite this behaviour with element-wise exponentiation/ logarithm. 
+```
+julia> exp([1 1; 1 1.0])
+2×2 Array{Float64,2}:
+ 4.19453  3.19453
+ 3.19453  4.19453
+
+julia> VML.exp([1 1; 1 1.0])
+2×2 Array{Float64,2}:
+ 2.71828  2.71828
+ 2.71828  2.71828
+```
+
+### Accuracy
 
 By default, VML uses `VML_HA` mode, which corresponds to an accuracy of
 <1 ulp, matching the accuracy of Julia's built-in openlibm
@@ -43,9 +76,8 @@ VML use only a single core when performing these benchmarks.
 
 ## Supported functions
 
-VML.jl supports the following functions, currently for Float32 and
-Float64 only. While VML also offers operators for complex numbers,
-these are not yet implemented in VML.jl.
+VML.jl supports the following functions, most for Float32 and
+Float64, while some also take complex numbers.
 
 ### Unary functions
 
@@ -102,5 +134,21 @@ Allocating | Mutating
 `divide`       | `divide!`
 
 
-### Next steps
-Next steps for this package are proper Windows support, writing up proper testing to make sure each advertised function actually works as expected and build testing on travis.
+## Next steps
+Next steps for this package 
+* [x] Windows support
+* [x] Basic Testing
+* [x] Avoiding overloading base and optional overload function
+* [ ] Updating Benchmarks
+* [ ] Testing Travis
+* [ ] Adding CIS function
+
+
+
+## Advanced 
+VML.jl works via Libdl which loads the relevant shared libraries. Libdl automatically finds the relevant libraries if the location of the binaries has been added to the system search paths. 
+This already taken care of if you use MKL.jl, but the stand-alone may require you to source `mklvars.sh`. The default command on Mac and Ubuntu is `source /opt/intel/mkl/bin/mklvars.sh intel64`. You may want to add this to your `.bashrc`. 
+Adding a new `*.conf` file in `/etc/ld.so.conf.d` also works, as the `intel-mkl-slim` package in the AUR does automatically. 
+
+Further, VML.jl uses [CpuId.jl](https://github.com/m-j-w/CpuId.jl) to detect if your processor supports the newer `avx2` instructions, and if not defaults to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
+If the CPU feature detection does not work for you, please open an issue. 
