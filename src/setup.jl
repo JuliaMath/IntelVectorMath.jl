@@ -1,6 +1,7 @@
 
 function __init__()
-    for mklpath in [Base.find_package("MKL")]
+    MKLpkgid = Base.PkgId(Base.UUID("33e6dc65-8f57-5167-99aa-e5a354878fb2"), "MKL")
+    for mklpath in [Base.locate_package(MKLpkgid)]
         libpath = normpath(joinpath(dirname(mklpath), "../deps/usr/lib"))
         push!(Libdl.DL_LOAD_PATH, libpath)
     end
