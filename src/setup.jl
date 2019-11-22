@@ -62,8 +62,9 @@ function vml_prefix(t::DataType)
     error("unknown type $t")
 end
 
-function def_unary_op(tin, tout, jlname, jlname!, mklname)
-    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
+function def_unary_op(tin, tout, jlname, jlname!, mklname; 
+        vmltype = tin)
+    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$mklname"))
     exports = Symbol[]
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)

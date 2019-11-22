@@ -25,6 +25,7 @@ const base_unary_real = (
     (:Base, :floor, (-1000, 1000)),
     (:Base, :round, (-1000, 1000)),
     (:Base, :trunc, (-1000, 1000)),
+    (:Base, :cis, (-1000, 1000)),
     (:SpecialFunctions, :erf, (-3.8325067f0, 3.8325067f0)),
     (:SpecialFunctions, :erfc, (-3.7439213f0, 10.019834f0)),
     (:SpecialFunctions, :erfinv, (-1, 1)),

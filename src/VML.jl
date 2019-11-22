@@ -88,6 +88,9 @@ for t in (Float32, Float64)
     def_unary_op(Complex{t}, t, :abs, :abs!, :Abs)
     def_unary_op(Complex{t}, t, :angle, :angle!, :Arg)
 
+    ### cis is special, vml function is based on output
+    def_unary_op(t, Complex{t}, :cis, :cis!, :CIS; vmltype = Complex{t})
+
     # Binary, complex-only. These are more accurate but performance is
     # either equivalent to Base or slower.
     # def_binary_op(Complex{t}, Complex{t}, (:+), :add!, :Add, false)
