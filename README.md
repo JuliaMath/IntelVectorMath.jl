@@ -142,8 +142,9 @@ Next steps for this package
 * [x] Basic Testing
 * [x] Avoiding overloading base and optional overload function
 * [ ] Updating Benchmarks
-* [ ] Testing Travis
-* [ ] Adding CIS function
+* [x] Travis and AppVeyor testing
+* [x] Adding CIS function
+* [ ] Add tests for mutating functions
 
 
 

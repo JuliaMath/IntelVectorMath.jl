@@ -6,9 +6,13 @@ function __init__()
         push!(Libdl.DL_LOAD_PATH, libpath)
     end
 
-    Libdl.dlopen(rtlib, RTLD_GLOBAL)
-    Libdl.dlopen(corelib, RTLD_GLOBAL) # maybe only needed on mac
-    Libdl.dlopen(lib, RTLD_GLOBAL)
+    if isempty(Libdl.find_library(:libmkl_rt))
+        error("Could not find MKL shared libraries. Please add MKL.jl or install MKL via the intel website. See the github repository for more details.)")
+    else
+        Libdl.dlopen(rtlib, RTLD_GLOBAL)
+        Libdl.dlopen(corelib, RTLD_GLOBAL) # maybe only needed on mac
+        Libdl.dlopen(lib, RTLD_GLOBAL)
+    end
 end
 
 __init__()

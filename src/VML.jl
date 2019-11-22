@@ -28,7 +28,7 @@ for t in (Float32, Float64)
     # Unary, real-only
     def_unary_op(t, t, :cbrt, :cbrt!, :Cbrt)
     def_unary_op(t, t, :expm1, :expm1!, :Expm1)
-    def_unary_op(t, t, :log1p, :log1p, :Log1p)
+    def_unary_op(t, t, :log1p, :log1p!, :Log1p)
     def_unary_op(t, t, :abs, :abs!, :Abs)
     def_unary_op(t, t, :abs2, :abs2!, :Sqr)
     def_unary_op(t, t, :ceil, :ceil!, :Ceil)
