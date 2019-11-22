@@ -6,7 +6,7 @@ function __init__()
         push!(Libdl.DL_LOAD_PATH, libpath)
     end
 
-    if isempty(Libdl.find_library(:libmkl_rt))
+    if isempty(Libdl.find_library(rtlib))
         error("Could not find MKL shared libraries. Please add MKL.jl or install MKL via the intel website. See the github repository for more details.)")
     else
         Libdl.dlopen(rtlib, RTLD_GLOBAL)
