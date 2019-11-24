@@ -1,18 +1,18 @@
 
 function __init__()
     MKLpkgid = Base.PkgId(Base.UUID("33e6dc65-8f57-5167-99aa-e5a354878fb2"), "MKL")
-    for mklpath in [Base.locate_package(MKLpkgid)]
+    mklpath = Base.locate_package(MKLpkgid)
+    if !isempty(mklpath)
         libpath = normpath(joinpath(dirname(mklpath), "../deps/usr/lib"))
         push!(Libdl.DL_LOAD_PATH, libpath)
+    elseif isempty(Libdl.find_library(rtlib))
+        error("Could not find MKL shared libraries. Please add MKL.jl or install MKL via the intel website. See the github repository for more details.)")
     end
 
-    if isempty(Libdl.find_library(rtlib))
-        error("Could not find MKL shared libraries. Please add MKL.jl or install MKL via the intel website. See the github repository for more details.)")
-    else
-        Libdl.dlopen(rtlib, RTLD_GLOBAL)
-        Libdl.dlopen(corelib, RTLD_GLOBAL) # maybe only needed on mac
-        Libdl.dlopen(lib, RTLD_GLOBAL)
-    end
+    Libdl.dlopen(rtlib, RTLD_GLOBAL)
+    Libdl.dlopen(corelib, RTLD_GLOBAL) # maybe only needed on mac
+    Libdl.dlopen(lib, RTLD_GLOBAL)
+
 end
 
 __init__()
