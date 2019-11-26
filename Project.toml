@@ -8,7 +8,7 @@ Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
-julia = "0.7 1.0"
+julia = "0.7, 1.0"
 CpuId = "0.2"
 
 [extras]
