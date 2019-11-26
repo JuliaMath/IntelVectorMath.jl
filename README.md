@@ -9,7 +9,7 @@ arithmetic and transcendental functions. Especially for large vectors it is ofte
 
 To use VML.jl, you must have the shared libraries of the Intel Vector Math Library avilable on your system.
 The easiest option is to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl) via 
-```
+```julia
 julia> ] add https://github.com/JuliaComputing/MKL.jl.git
 ```
 Alternatively you can install MKL directly [from intel](https://software.intel.com/en-us/mkl/choose-download).
@@ -17,42 +17,59 @@ Alternatively you can install MKL directly [from intel](https://software.intel.c
 Note that intel MKL has a separate license, which you may want to check for commercial projects (see [FAQ]( https://software.intel.com/en-us/mkl/license-faq)).
 
 To install VML.jl run 
-```
-julia> ] add https://github.com/Crown421/VML.jl
+```julia
+julia> ] add https://github.com/JuliaMath/VML.jl
 ```
 
 ## Using VML
 After loading `VML`, you have the supported function listed below available to call, i.e. `VML.sin(rand(100))`. This should provide a significant speed-up over broadcasting the Base functions.
-```
-julia> using VML
-julia> a = rand(10000);
-julia>@time  sin.(a);                 
-0.159878 seconds (583.25 k allocations: 30.720 MiB, 2.78% gc time)
-julia> @time VML.sin(a);                                                                                
-0.000465 seconds (6 allocations: 781.484 KiB) 
+```julia
+julia> using VML, BenchmarkTools
+
+julia> a = randn(10^4);
+
+julia> @btime sin.($a);     # apply Base.sin to each element
+  102.128 μs (2 allocations: 78.20 KiB)
+
+julia> @btime VML.sin($a);  # apply VML.sin to the whole array
+  20.900 μs (2 allocations: 78.20 KiB)
+
+julia> b = similar(a);
+
+julia> @btime VML.sin!(b, a);  # in-place version 
+  20.008 μs (0 allocations: 0 bytes)
 ```
 
-Most function do currently (julia 1.x) not have a vectorized form, meaning that i.e. `sin(rand(10))` will not work.  If you would like to extend the Base function with this functionality you can overload them with the `@overload` macro:
+Most Julia functions do not automatically apply to all elements of an array, thus `sin(a)` gives a MethodError.  If you would like to extend the Base function with this functionality, you can add methods to them with the `@overload` macro:
+```julia
+julia> @overload sin cos tan;
+
+julia> @btime sin($a);
+  20.944 μs (2 allocations: 78.20 KiB)
+
+julia> ans ≈ sin.(a)
+true
 ```
-julia> @overload sin
-julia> @time sin(a);                                                                                
-0.000485 seconds (6 allocations: 781.484 KiB) 
-```
-Note the lack of the broadcasting dot`.` Now calling i.e. `sin` with an array as input will call the VML functions. 
+Calling `sin` on an array now calls the a VML function, while its action on scalars is unchanged. 
 
 #### Note:
-Some functions like `exp` and `log` do operate on matrices from Base and refer to the [matrix exponential](https://en.wikipedia.org/wiki/Matrix_exponential) and logarithm. Using `@overload exp` will overwrite this behaviour with element-wise exponentiation/ logarithm. 
-```
-julia> exp([1 1; 1 1.0])
+
+Some Julia functions like `exp` and `log` do operate on matrices, and refer to the [matrix exponential](https://en.wikipedia.org/wiki/Matrix_exponential) and logarithm. Using `@overload exp` will overwrite this behaviour with element-wise exponentiation/ logarithm.
+```julia
+julia> exp(ones(2,2))
 2×2 Array{Float64,2}:
  4.19453  3.19453
  3.19453  4.19453
 
-julia> VML.exp([1 1; 1 1.0])
+julia> VML.exp(ones(2,2))
 2×2 Array{Float64,2}:
  2.71828  2.71828
  2.71828  2.71828
+
+julia> ans == exp.(ones(2,2))
+true
 ```
+If your code, or any code you call, uses matrix exponentiation, then `@overload exp` may silently lead to incorrect results. This caution applies to all trigonometric functions, too, since they have matrix forms defined by matrix exponential.
 
 ### Accuracy
 
