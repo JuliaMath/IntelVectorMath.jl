@@ -1,0 +1,17 @@
+name = "VML"
+uuid = "c8ce9da6-5d36-5c03-b118-5a70151be7bc"
+
+[deps]
+CpuId = "adafc99b-e345-5852-983c-f28acb93d879"
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+
+[compat]
+julia = "≥ 0.7 1.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+MKL = "33e6dc65-8f57-5167-99aa-e5a354878fb2"
+
+[targets]
+test = ["Test", "MKL"]

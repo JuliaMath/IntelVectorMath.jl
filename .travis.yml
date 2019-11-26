@@ -1,0 +1,29 @@
+language: julia
+
+os:
+  - linux
+  - osx
+
+julia:
+  - 1.0
+  - nightly
+
+branches:
+  only:
+  - master
+  - TravisTesting
+
+before_script:
+  # Every 30 seconds, look for the build log file. If it exists, then
+  # start watching its contents and printing them to stdout as they
+  # change. This has two effects:
+  #   1. it avoids Travis timing out because the build outputs nothing
+  #   2. it makes it more obvious what part of the build, if any, gets stuck
+  # - while sleep 30; do tail ./deps/build.log -f ; done &
+  - julia --project --color=yes --check-bounds=yes -e 'using Pkg;  Pkg.add(PackageSpec(url="https://github.com/JuliaComputing/MKL.jl"));'
+
+script:
+  # 
+  - export JL_PKG=VML
+  - julia --color=yes -e "if VERSION < v\"0.7.0-DEV.5183\"; Pkg.clone(pwd()); Pkg.build(\"VML\"); else using Pkg; if VERSION >= v\"1.1.0-rc1\"; Pkg.build(\"VML\"; verbose=true); else Pkg.build(\"VML\"); end; end"
+  - julia --check-bounds=yes --color=yes -e "if VERSION < v\"0.7.0-DEV.5183\"; Pkg.test(\"VML\", coverage=true); else using Pkg; Pkg.test(coverage=true); end"
