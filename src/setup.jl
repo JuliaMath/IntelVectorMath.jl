@@ -2,7 +2,7 @@
 function __init__()
     MKLpkgid = Base.PkgId(Base.UUID("33e6dc65-8f57-5167-99aa-e5a354878fb2"), "MKL")
     mklpath = Base.locate_package(MKLpkgid)
-    if !isempty(mklpath)
+    if mklpath != nothing
         libpath = normpath(joinpath(dirname(mklpath), "../deps/usr/lib"))
         push!(Libdl.DL_LOAD_PATH, libpath)
     elseif isempty(Libdl.find_library(rtlib))
