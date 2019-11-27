@@ -10,7 +10,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 [compat]
 julia = "0.7, 1.0"
 CpuId = "0.2"
-SpecialFunctions - "0.9"
+SpecialFunctions = "0.9"
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 MKL = "33e6dc65-8f57-5167-99aa-e5a354878fb2"
