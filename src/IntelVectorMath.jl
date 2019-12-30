@@ -2,6 +2,9 @@ __precompile__()
 
 module IntelVectorMath
 
+export VML
+const VML = IntelVectorMath
+
 # import Base: .^, ./
 using SpecialFunctions
 using Libdl
