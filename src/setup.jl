@@ -46,9 +46,9 @@ function vml_check_error()
             # Singularity, overflow, or underflow
             # I don't think Base throws on these
         elseif vml_error == 1000
-            warn("VML does not support $(vml_get_accuracy); lower accuracy used instead")
+            warn("IntelVectorMath does not support $(vml_get_accuracy); lower accuracy used instead")
         else
-            error("an unexpected error occurred in VML ($vml_error)")
+            error("an unexpected error occurred in IntelVectorMath ($vml_error)")
         end
     end
 end

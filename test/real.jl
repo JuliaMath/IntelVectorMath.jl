@@ -19,12 +19,12 @@ fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_real]]
   for t in (Float32, Float64), i = 1:length(fns)
 
     base_fn = eval(:($(fns[i][1]).$(fns[i][2]))) 
-    vml_fn = eval(:(VML.$(fns[i][2])))
-    # vml_fn! = eval(:(VML.$(fns[i][2])!))
+    vml_fn = eval(:(IntelVectorMath.$(fns[i][2])))
+    # vml_fn! = eval(:(IntelVectorMath.$(fns[i][2])!))
 
-    Test.@test which(vml_fn, typeof(input[t][i])).module == VML
+    Test.@test which(vml_fn, typeof(input[t][i])).module == IntelVectorMath
 
-    # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "VML $t $fn")
+    # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
     Test.@test vml_fn(input[t][i]...) ≈ base_fn.(input[t][i]...)
 
   end
@@ -34,8 +34,8 @@ end
 @testset "Error Handling and Settings" begin
 
   # Verify that we still throw DomainErrors
-  Test.@test_throws DomainError VML.sqrt([-1.0])
-  Test.@test_throws DomainError VML.log([-1.0])
+  Test.@test_throws DomainError IntelVectorMath.sqrt([-1.0])
+  Test.@test_throws DomainError IntelVectorMath.log([-1.0])
 
   # Setting accuracy
   vml_set_accuracy(VML_LA)
@@ -48,7 +48,7 @@ end
 
 @testset "@overload macro" begin
 
-    @test VML.exp([1.0]) ≈ exp.([1.0])
+    @test IntelVectorMath.exp([1.0]) ≈ exp.([1.0])
     @test_throws MethodError Base.exp([1.0])
     @test (@overload log exp) isa String
     @test Base.exp([1.0]) ≈ exp.([1.0])

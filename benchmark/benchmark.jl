@@ -1,4 +1,4 @@
-using VML
+using IntelVectorMath
 using Distributions, Statistics, BenchmarkTools # for benchmark
 using Plots # for plotting
 using JLD2, FileIO # to save file
@@ -32,7 +32,7 @@ fns = [[x[1:2] for x in base_unary_real];
 """
     bench(fns, input)
 
-benchmark function for VML.jl. Calls both Base and VML functions and stores the benchmarks in two nested Dict. First layer specifies type, and second layer specifies the function name. The result is a Tuple, 1st element being benchmark for Base/SpecialFunctions and 2nd element being for VML.
+benchmark function for IntelVectorMath.jl. Calls both Base and IntelVectorMath functions and stores the benchmarks in two nested Dict. First layer specifies type, and second layer specifies the function name. The result is a Tuple, 1st element being benchmark for Base/SpecialFunctions and 2nd element being for IntelVectorMath.
 
 # Examples
 ```julia
@@ -41,14 +41,14 @@ input = Dict( Float64 => [(rand(1000)); (rand(1000), rand(1000)); (rand(1000))])
 times = bench(fns, input)
 
 times[Float64][:acos][1] # Base.acos benchmark for Float64
-times[Float64][:acos][2] # VML.acos benchmark for Float64
+times[Float64][:acos][2] # IntelVectorMath.acos benchmark for Float64
 ```
 """
 function bench(fns, input)
     Dict(t => begin
         Dict( fn[2] => begin
             base_fn = eval(:($(fn[1]).$(fn[2])))
-            vml_fn = eval(:(VML.$(fn[2])))
+            vml_fn = eval(:(IntelVectorMath.$(fn[2])))
             println("benchmarking $vml_fn for type $t")
             timesBase = @benchmark $base_fn.($inp...)
             timesVML = @benchmark $vml_fn($inp...)
@@ -137,8 +137,8 @@ function plotBench()
     # end
     xlims!(0, length(fns) + 1)
     xticks!(1:length(fns)+1, fname, rotation = 70, fontsize = 10)
-    title!("VML Performance for array of size $NVALS")
-    ylabel!("Relative Speed (VML/Base)")
+    title!("IntelVectorMath Performance for array of size $NVALS")
+    ylabel!("Relative Speed (IntelVectorMath/Base)")
     hline!([1], line=(4, :dash, 0.6, [:green]), labels = 1)
     savefig("performance$(complex ? "_complex" : "").png")
 

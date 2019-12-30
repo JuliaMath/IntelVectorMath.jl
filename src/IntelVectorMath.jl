@@ -1,6 +1,6 @@
 __precompile__()
 
-module VML
+module IntelVectorMath
 
 # import Base: .^, ./
 using SpecialFunctions
@@ -88,7 +88,7 @@ for t in (Float32, Float64)
     def_unary_op(Complex{t}, t, :abs, :abs!, :Abs)
     def_unary_op(Complex{t}, t, :angle, :angle!, :Arg)
 
-    ### cis is special, vml function is based on output
+    ### cis is special, IntelVectorMath function is based on output
     def_unary_op(t, Complex{t}, :cis, :cis!, :CIS; vmltype = Complex{t})
 
     # Binary, complex-only. These are more accurate but performance is
@@ -104,11 +104,11 @@ end
 """
     @overload exp log sin
 
-This macro adds a method to each function in `Base` (or perhaps in `SpecialFunctions`), 
-so that when acting on an array (or two arrays) it calls the `VML` function of the same name.
+This macro adds a method to each function in `Base` (or perhaps in `SpecialFunctions`),
+so that when acting on an array (or two arrays) it calls the `IntelVectorMath` function of the same name.
 
 The existing action on scalars is unaffected. However, `exp(M::Matrix)` will now mean
-element-wise `VML.exp(M) == exp.(M)`, rather than matrix exponentiation.
+element-wise `IntelVectorMath.exp(M) == exp.(M)`, rather than matrix exponentiation.
 """
 macro overload(funs...)
     out = quote end
@@ -116,25 +116,25 @@ macro overload(funs...)
     for f in funs
         if f in _UNARY
             if isdefined(Base, f)
-                push!(out.args, :( Base.$f(A::Array) = VML.$f(A) ))
+                push!(out.args, :( Base.$f(A::Array) = IntelVectorMath.$f(A) ))
                 push!(say, "Base.$f(A)")
             elseif isdefined(SpecialFunctions, f)
-                push!(out.args, :( VML.SpecialFunctions.$f(A::Array) = VML.$f(A) ))
+                push!(out.args, :( IntelVectorMath.SpecialFunctions.$f(A::Array) = IntelVectorMath.$f(A) ))
                 push!(say, "SpecialFunctions.$f(A)")
             else
-                @error "function VML.$f is not defined in Base or SpecialFunctions, so there is nothing to overload"
+                @error "function IntelVectorMath.$f is not defined in Base or SpecialFunctions, so there is nothing to overload"
             end
         end
         if f in _BINARY
             if isdefined(Base, f)
-                push!(out.args, :( Base.$f(A::Array, B::Array) = VML.$f(A, B) ))
+                push!(out.args, :( Base.$f(A::Array, B::Array) = IntelVectorMath.$f(A, B) ))
                 push!(say, "Base.$f(A, B)")
             else
-                @error "function VML.$f is not defined in Base, so there is nothing to overload"
+                @error "function IntelVectorMath.$f is not defined in Base, so there is nothing to overload"
             end
         end
         if !(f in _UNARY) && !(f in _BINARY)
-            error("there is no function $f defined by VML.jl")
+            error("there is no function $f defined by IntelVectorMath.jl")
         end
     end
     str = string("Overloaded these functions: \n  ", join(say, " \n  "))
