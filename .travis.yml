@@ -24,6 +24,6 @@ before_script:
 
 script:
   # 
-  - export JL_PKG=VML
-  - julia --color=yes -e "if VERSION < v\"0.7.0-DEV.5183\"; Pkg.clone(pwd()); Pkg.build(\"VML\"); else using Pkg; if VERSION >= v\"1.1.0-rc1\"; Pkg.build(\"VML\"; verbose=true); else Pkg.build(\"VML\"); end; end"
-  - julia --check-bounds=yes --color=yes -e "if VERSION < v\"0.7.0-DEV.5183\"; Pkg.test(\"VML\", coverage=true); else using Pkg; Pkg.test(coverage=true); end"
+  - export JL_PKG=IntelVectorMath
+  - julia --color=yes -e "if VERSION < v\"0.7.0-DEV.5183\"; Pkg.clone(pwd()); Pkg.build(\"IntelVectorMath\"); else using Pkg; if VERSION >= v\"1.1.0-rc1\"; Pkg.build(\"IntelVectorMath\"; verbose=true); else Pkg.build(\"IntelVectorMath\"); end; end"
+  - julia --check-bounds=yes --color=yes -e "if VERSION < v\"0.7.0-DEV.5183\"; Pkg.test(\"IntelVectorMath\", coverage=true); else using Pkg; Pkg.test(coverage=true); end"

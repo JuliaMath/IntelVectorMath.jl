@@ -18,11 +18,11 @@ fns = [x[1:2] for x in base_unary_complex]
   for t in (ComplexF32, ComplexF64), i = 1:length(fns)
 
     base_fn = eval(:($(fns[i][1]).$(fns[i][2]))) 
-    vml_fn = eval(:(VML.$(fns[i][2])))
+    vml_fn = eval(:(IntelVectorMath.$(fns[i][2])))
 
-    Test.@test which(vml_fn, typeof(input[t][i])).module == VML
+    Test.@test which(vml_fn, typeof(input[t][i])).module == IntelVectorMath
 
-    # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "VML $t $fn")
+    # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
     Test.@test vml_fn(input[t][i]...) ≈ base_fn.(input[t][i]...)
 
   end

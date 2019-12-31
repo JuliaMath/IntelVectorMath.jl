@@ -1,5 +1,5 @@
 using Test
-using VML
+using IntelVectorMath
 
 include("common.jl")
 include("real.jl")
