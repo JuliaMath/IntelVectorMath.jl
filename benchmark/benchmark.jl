@@ -1,148 +1,98 @@
 using IntelVectorMath
-using Distributions, Statistics, BenchmarkTools # for benchmark
-using Plots # for plotting
-using JLD2, FileIO # to save file
+using AcuteBenchmark
+################################################################
+# Dimensions
+oneArgDims = [10]
 
-cd(dirname(@__FILE__))
-include(joinpath(dirname(dirname(@__FILE__)), "test", "common.jl"))
+twoArgDims = [10; # arg1
+              10] # arg2
 
 ################################################################
-complex = !isempty(ARGS) && ARGS[1] == "complex"
-complex = false
+## Real Functions
 
-# First generate some random data and test functions in Base on it
-const NVALS = 10_000
-base_unary = complex ? base_unary_complex : base_unary_real
-base_binary = complex ? base_binary_complex : base_binary_real
-types = complex ? (Complex64, Complex128) : (Float32, Float64)
+typesReal=[Float32, Float64]
 
-# arrays of inputs are stored in a Tuple. So later for calling use inp... to get the content of the Tuple
-input = Dict( t =>
-[
- [(randindomain(t, NVALS, domain),) for (_, _, domain) in base_unary];
- [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2)) for (_, _, domain1, domain2) in base_binary];
- # (randindomain(t, NVALS, (0, 100)), randindomain(t, 1, (-1, 20))[1])
-]
-    for t in types)
+configsRealBase = FunbArray([
+    # oneArgDims
+    Funb(acos, [(-1, 1)], typesReal, oneArgDims),
+    Funb(asin, [(-1, 1)], typesReal, oneArgDims),
+    Funb(atan, [(-50, 50)], typesReal, oneArgDims),
+    Funb(cos, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(sin, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(tan, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(acosh, [(1, 1000)], typesReal, oneArgDims),
+    Funb(asinh, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(atanh, [(-1, 1)], typesReal, oneArgDims),
+    Funb(cosh, [(0, 89.415985f0)], typesReal, oneArgDims),
+    Funb(sinh, [(-89.415985f0, 89.415985f0)], typesReal, oneArgDims),
+    Funb(tanh, [(-8.66434f0, 8.66434f0)], typesReal, oneArgDims),
+    Funb(cbrt, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(sqrt, [(0, 1000)], typesReal, oneArgDims),
+    Funb(exp, [(-88.72284f0, 88.72284f0)], typesReal, oneArgDims),
+    Funb(expm1, [(-88.72284f0, 88.72284f0)], typesReal, oneArgDims),
+    Funb(log, [(0, 1000)], typesReal, oneArgDims),
+    # Funb(log10, [(0, 1000)], typesReal, oneArgDims), # faulty
+    Funb(abs, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(abs2, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(ceil, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(floor, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(round, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(trunc, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(cis, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(SpecialFunctions.erf, [(-3.8325067f0, 3.8325067f0)], typesReal, oneArgDims),
+    Funb(SpecialFunctions.erfc, [(-3.7439213f0, 10.019834f0)], typesReal, oneArgDims),
+    Funb(SpecialFunctions.erfinv, [(-1, 1)], typesReal, oneArgDims),
+    Funb(SpecialFunctions.erfcinv, [(0, 2)], typesReal, oneArgDims),
+    # Funb(SpecialFunctions.lgamma, [(0, 1000)], typesReal, oneArgDims),
+    Funb(SpecialFunctions.gamma, [(0, 36)], typesReal, oneArgDims),
+    # twoArgDims
+    Funb(atan, [(-1, 1), (-1, 1)], typesReal, twoArgDims),
+    Funb(hypot, [(-1000, 1000), (-1000, 1000)], typesReal, twoArgDims),
+    # Funb(/, [(-1000, 1000), (-1000, 1000)], typesReal, twoArgDims),
+    # Funb(^, [(0, 100), (-5, 20)], typesReal, twoArgDims),
+])
 
-fns = [[x[1:2] for x in base_unary_real];
-       [x[1:2] for x in base_binary_real]]
+configsRealIVM = FunbArray([
+    # oneArgDims
+    Funb(IVM.acos, [(-1, 1)], typesReal, oneArgDims),
+    Funb(IVM.asin, [(-1, 1)], typesReal, oneArgDims),
+    Funb(IVM.atan, [(-50, 50)], typesReal, oneArgDims),
+    Funb(IVM.cos, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.sin, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.tan, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.acosh, [(1, 1000)], typesReal, oneArgDims),
+    Funb(IVM.asinh, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.atanh, [(-1, 1)], typesReal, oneArgDims),
+    Funb(IVM.cosh, [(0, 89.415985f0)], typesReal, oneArgDims),
+    Funb(IVM.sinh, [(-89.415985f0, 89.415985f0)], typesReal, oneArgDims),
+    Funb(IVM.tanh, [(-8.66434f0, 8.66434f0)], typesReal, oneArgDims),
+    Funb(IVM.cbrt, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.sqrt, [(0, 1000)], typesReal, oneArgDims),
+    Funb(IVM.exp, [(-88.72284f0, 88.72284f0)], typesReal, oneArgDims),
+    Funb(IVM.expm1, [(-88.72284f0, 88.72284f0)], typesReal, oneArgDims),
+    Funb(IVM.log, [(0, 1000)], typesReal, oneArgDims),
+    # Funb(IVM.log10, [(0, 1000)], typesReal, oneArgDims), # faulty
+    Funb(IVM.abs, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.abs2, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.ceil, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.floor, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.round, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.trunc, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.cis, [(-1000, 1000)], typesReal, oneArgDims),
+    Funb(IVM.erf, [(-3.8325067f0, 3.8325067f0)], typesReal, oneArgDims),
+    Funb(IVM.erfc, [(-3.7439213f0, 10.019834f0)], typesReal, oneArgDims),
+    Funb(IVM.erfinv, [(-1, 1)], typesReal, oneArgDims),
+    Funb(IVM.erfcinv, [(0, 2)], typesReal, oneArgDims),
+    # Funb(IVM.lgamma, [(0, 1000)], typesReal, oneArgDims), # faulty
+    Funb(IVM.gamma, [(0, 36)], typesReal, oneArgDims),
+    # twoArgDims
+    Funb(IVM.atan, [(-1, 1), (-1, 1)], typesReal, twoArgDims),
+    Funb(IVM.hypot, [(-1000, 1000), (-1000, 1000)], typesReal, twoArgDims),
+    # Funb(IVM.(/), [(-1000, 1000), (-1000, 1000)], typesReal, twoArgDims),
+    # Funb(IVM.(^), [(0, 100), (-5, 20)], typesReal, twoArgDims),
+])
+
 ################################################################
-
-"""
-    bench(fns, input)
-
-benchmark function for IntelVectorMath.jl. Calls both Base and IntelVectorMath functions and stores the benchmarks in two nested Dict. First layer specifies type, and second layer specifies the function name. The result is a Tuple, 1st element being benchmark for Base/SpecialFunctions and 2nd element being for IntelVectorMath.
-
-# Examples
-```julia
-fns = [(:Base, :acos); (:Base, :atan); (:SpecialFunctions, :ref)] # array of tuples
-input = Dict( Float64 => [(rand(1000)); (rand(1000), rand(1000)); (rand(1000))]) # Dict of array of tuples
-times = bench(fns, input)
-
-times[Float64][:acos][1] # Base.acos benchmark for Float64
-times[Float64][:acos][2] # IntelVectorMath.acos benchmark for Float64
-```
-"""
-function bench(fns, input)
-    Dict(t => begin
-        Dict( fn[2] => begin
-            base_fn = eval(:($(fn[1]).$(fn[2])))
-            vml_fn = eval(:(IntelVectorMath.$(fn[2])))
-            println("benchmarking $vml_fn for type $t")
-            timesBase = @benchmark $base_fn.($inp...)
-            timesVML = @benchmark $vml_fn($inp...)
-
-            [timesBase, timesVML]
-        end for (fn, inp) in zip(fns, input[t]) )
-    end for t in types)
-end
-################################################################
-
-# do benchmark
-benches = bench(fns, input)
-
-@save "benchmarkData.jld" benches
-# @save "benchmarkData-complex.jld" benches
-
-# benches = load("benchmarkData.jld2", "benches")
-
-
-# something is wrong with these
-deleteat!(fns, [18, 31])
-delete!(benches[Float32], :lgamma)
-delete!(benches[Float64], :lgamma)
-delete!(benches[Float32], :log10)
-delete!(benches[Float64], :log10)
-
-################################################################
-
-"""
-benchmark analysis function
-"""
-function ratioci(y, x, alpha = 0.05)
-    tq² = abs2(quantile(TDist(length(x) + length(y) - 2), alpha))
-    μx = mean(x)
-    σx² = varm(x, μx)
-    μy = mean(y)
-    σy² = varm(y, μy)
-    a = sqrt((μx * μy)^2 - (μx^2 - tq² * σx²) * (μy^2 - tq² * σy²))
-    b = μx^2 - tq² * σx²
-    return (((μx * μy) - a) / b, ((μx * μy) + a) / b)
-end
-
-################################################################
-
-"""
-Does analysis of the benchmark data and plots them as bars.
-"""
-function plotBench()
-
-# Print ratio
-    colors = [:blue, :red]
-    for itype = 1:length(types)
-
-        # creating arrays of times from benchmarks
-        benchVals = collect(values(benches[types[itype]]))
-        builtint = [x[1].times for x in benchVals]
-        vmlt = [x[2].times for x in benchVals]
-
-        # calculating mean of run times
-        μ = vec(map(mean, builtint) ./ map(mean, vmlt))
-
-        # error bar disabled because benchmark tools takes care of errors
-
-        # # calculating error bars
-        # ci = zeros(Float64, 2, length(fns))
-        # for ifn = 1:length(builtint)
-        #     lower, upper = ratioci(builtint[ifn], vmlt[ifn])
-        #     ci[1, ifn] = μ[ifn] - lower
-        #     ci[2, ifn] = upper - μ[ifn]
-        # end
-
-        # adding bar
-        plt = bar!(
-            0.2+(0.4*itype):length(fns),
-            μ,
-            # yerror = ci,
-            fillcolor = colors[itype],
-            labels = [string(x) for x in types],
-            dpi = 600
-        )
-    end
-    fname = [string(fn[2]) for fn in fns]
-    # if !complex
-    #     fname[end-1] = "A.^B"
-    #     fname[end] = "A.^b"
-    # end
-    xlims!(0, length(fns) + 1)
-    xticks!(1:length(fns)+1, fname, rotation = 70, fontsize = 10)
-    title!("IntelVectorMath Performance for array of size $NVALS")
-    ylabel!("Relative Speed (IntelVectorMath/Base)")
-    hline!([1], line=(4, :dash, 0.6, [:green]), labels = 1)
-    savefig("performance$(complex ? "_complex" : "").png")
-
-end
 
 ################################################################
 
