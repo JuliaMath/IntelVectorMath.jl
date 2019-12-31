@@ -8,7 +8,7 @@ Until Julia 0.6 the package was registered as `VML.jl`.
 
 ## Basic install
 
-To use IntelVectorMath.jl, you must have the shared libraries of the Intel Vector Math Library avilable on your system.
+To use IntelVectorMath.jl, you must have the shared libraries of the Intel Vector Math Library available on your system.
 The easiest option is to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl) via
 ```julia
 julia> ] add https://github.com/JuliaComputing/MKL.jl.git
@@ -23,9 +23,11 @@ julia> ] add https://github.com/JuliaMath/IntelVectorMath.jl
 ```
 
 ## Using IntelVectorMath
-After loading `IntelVectorMath`, you have the supported function listed below available to call, i.e. `IntelVectorMath.sin(rand(100))`. For convenience the alias `IVM` is exported, so after `using` the package you can also call  `IVM.sin(rand(100))` for short. 
-If you `import` the package, you can add this alias (or any other) via `const IVM = IntelVectorMath`.
-This should provide a significant speed-up over broadcasting the Base functions.
+After loading `IntelVectorMath`, you have the supported function listed below, for example `IntelVectorMath.sin(rand(100))`. These should provide a significant speed-up over broadcasting the Base functions.
+Since the package name is quite long, an alias `IVM` is also exported to allow `IVM.sin(rand(100))` after `using` the package. 
+If you `import` the package, you can add this alias via `const IVM = IntelVectorMath`. Equally, you can replace `IVM` with another alias of your choice. 
+
+#### Example
 ```julia
 julia> using IntelVectorMath, BenchmarkTools
 
@@ -72,7 +74,7 @@ julia> exp(ones(2,2))
 julia> ans == exp.(ones(2,2))
 true
 ```
-If your code, or any code you call, uses matrix exponentiation, then `@overload exp` may silently lead to incorrect results. This caution applies to all trigonometric functions, too, since they have matrix forms defined by matrix exponential.
+If your code, or any code you call, uses matrix exponentiation, then `@overload exp` may silently lead to incorrect results. This caution applies to all trigonometric functions, too, since they have matrix forms defined by matrix exponentials.
 
 ### Accuracy
 
@@ -161,11 +163,11 @@ Next steps for this package
 * [x] Windows support
 * [x] Basic Testing
 * [x] Avoiding overloading base and optional overload function
-* [ ] Updating Benchmarks
 * [x] Travis and AppVeyor testing
 * [x] Adding CIS function
+* [ ] Updating Benchmarks
 * [ ] Add tests for mutating functions
-
+* [ ] Add test for using standalone MKL
 
 
 ## Advanced
