@@ -3,7 +3,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/btdduqfsxux8fhsr?svg=true)](https://ci.appveyor.com/project/Crown421/IntelVectorMath-jl)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://software.intel.com/en-us/node/521751).
-This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array. 
+This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array.
 Until Julia 0.6 the package was registered as `VML.jl`.
 
 ## Basic install
@@ -24,8 +24,8 @@ julia> ] add https://github.com/JuliaMath/IntelVectorMath.jl
 
 ## Using IntelVectorMath
 After loading `IntelVectorMath`, you have the supported function listed below, for example `IntelVectorMath.sin(rand(100))`. These should provide a significant speed-up over broadcasting the Base functions.
-Since the package name is quite long, an alias `IVM` is also exported to allow `IVM.sin(rand(100))` after `using` the package. 
-If you `import` the package, you can add this alias via `const IVM = IntelVectorMath`. Equally, you can replace `IVM` with another alias of your choice. 
+Since the package name is quite long, an alias `IVM` is also exported to allow `IVM.sin(rand(100))` after `using` the package.
+If you `import` the package, you can add this alias via `const IVM = IntelVectorMath`. Equally, you can replace `IVM` with another alias of your choice.
 
 #### Example
 ```julia
@@ -87,16 +87,15 @@ regarding these options is available on
 [Intel's website](http://software.intel.com/sites/products/documentation/hpc/mkl/IntelVectorMath/vmldata.htm).
 
 ## Performance
-(These results are currently outdated and will be updated in due course)
-![IntelVectorMath Performance Comparison](/benchmark/performance.png)
+Relative speed of IntelVectorMath/Base
+
+![IntelVectorMath Performance Comparison](/benchmark/bar/bench-dims-set4-relative.png)
 
 ![IntelVectorMath Complex Performance Comparison](/benchmark/performance_complex.png)
 
-Tests were performed on an Intel(R) Core(TM) i7-3930K CPU. Error bars
-are 95% confidence intervals based on 25 repetitions of each test with
-a 1,000,000 element vector. The dashed line indicates equivalent
-performance for IntelVectorMath versus the implementations in Base. Both Base and
-IntelVectorMath use only a single core when performing these benchmarks.
+![IntelVectorMath Performance over dimensions](/benchmark/dimplot/bench-atan-Type-Float32.png)
+
+Tests were performed on an Intel(R) Core(TM) i5-8250U @ 1.6 [GHz] 1800 Mhz. The dashed line indicates equivalent performance for IntelVectorMath versus the implementations in Base.
 
 ## Supported functions
 

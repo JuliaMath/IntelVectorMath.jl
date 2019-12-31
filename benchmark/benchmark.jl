@@ -1,11 +1,13 @@
-using IntelVectorMath
+using IntelVectorMath, SpecialFunctions
 using AcuteBenchmark
+
+cd(@__DIR__)
 ################################################################
 # Dimensions
-oneArgDims = [10]
+oneArgDims = [10 20 50 100 1000 10000]
 
-twoArgDims = [10; # arg1
-              10] # arg2
+twoArgDims = [10 20 50 100 1000 10000; # arg1
+              10 20 50 100 1000 10000] # arg2
 
 ################################################################
 ## Real Functions
@@ -13,6 +15,7 @@ twoArgDims = [10; # arg1
 typesReal=[Float32, Float64]
 
 configsRealBase = FunbArray([
+
     # oneArgDims
     Funb(acos, [(-1, 1)], typesReal, oneArgDims),
     Funb(asin, [(-1, 1)], typesReal, oneArgDims),
@@ -45,6 +48,7 @@ configsRealBase = FunbArray([
     Funb(SpecialFunctions.erfcinv, [(0, 2)], typesReal, oneArgDims),
     # Funb(SpecialFunctions.lgamma, [(0, 1000)], typesReal, oneArgDims),
     Funb(SpecialFunctions.gamma, [(0, 36)], typesReal, oneArgDims),
+
     # twoArgDims
     Funb(atan, [(-1, 1), (-1, 1)], typesReal, twoArgDims),
     Funb(hypot, [(-1000, 1000), (-1000, 1000)], typesReal, twoArgDims),
@@ -53,6 +57,7 @@ configsRealBase = FunbArray([
 ])
 
 configsRealIVM = FunbArray([
+
     # oneArgDims
     Funb(IVM.acos, [(-1, 1)], typesReal, oneArgDims),
     Funb(IVM.asin, [(-1, 1)], typesReal, oneArgDims),
@@ -85,6 +90,7 @@ configsRealIVM = FunbArray([
     Funb(IVM.erfcinv, [(0, 2)], typesReal, oneArgDims),
     # Funb(IVM.lgamma, [(0, 1000)], typesReal, oneArgDims), # faulty
     Funb(IVM.gamma, [(0, 36)], typesReal, oneArgDims),
+
     # twoArgDims
     Funb(IVM.atan, [(-1, 1), (-1, 1)], typesReal, twoArgDims),
     Funb(IVM.hypot, [(-1000, 1000), (-1000, 1000)], typesReal, twoArgDims),
@@ -95,8 +101,9 @@ configsRealIVM = FunbArray([
 ################################################################
 # Complex Functions
 
-typesComplex=[Complex64, Complex128]
-
+typesComplex=[Complex{Float32}, Complex{Float64}]
+# Uniform should support Complex input - Submit a PR to Distributions
+#=
 configsComplexBase = FunbArray([
     # oneArgDims
     Funb(acos, [(-1, 1)], typesComplex, oneArgDims),
@@ -118,9 +125,6 @@ configsComplexBase = FunbArray([
     Funb(abs, [(-1000, 1000)], typesComplex, oneArgDims),
     Funb(angle, [(-1000, 1000)], typesComplex, oneArgDims),
     Funb(conj, [(-1000, 1000)], typesComplex, oneArgDims),
-    Funb(floor, [(-1000, 1000)], typesComplex, oneArgDims),
-    Funb(round, [(-1000, 1000)], typesComplex, oneArgDims),
-    Funb(trunc, [(-1000, 1000)], typesComplex, oneArgDims),
     # Funb(cis, [(-1000, 1000)], typesComplex, oneArgDims),
 
     # twoArgDims
@@ -140,6 +144,9 @@ configsComplexBase = FunbArray([
     # Funb(SpecialFunctions.erfcinv, [(0, 2)], typesComplex, oneArgDims),
     # Funb(SpecialFunctions.lgamma, [(0, 1000)], typesComplex, oneArgDims),
     # Funb(SpecialFunctions.gamma, [(0, 36)], typesComplex, oneArgDims),
+    # Funb(floor, [(-1000, 1000)], typesComplex, oneArgDims),
+    # Funb(round, [(-1000, 1000)], typesComplex, oneArgDims),
+    # Funb(trunc, [(-1000, 1000)], typesComplex, oneArgDims),
 
     ## twoArgDims
     # Funb(atan, [(-1, 1), (-1, 1)], typesComplex, twoArgDims),
@@ -167,9 +174,6 @@ configsComplexIVM = FunbArray([
     Funb(IVM.abs, [(-1000, 1000)], typesComplex, oneArgDims),
     Funb(IVM.angle, [(-1000, 1000)], typesComplex, oneArgDims),
     Funb(IVM.conj, [(-1000, 1000)], typesComplex, oneArgDims),
-    Funb(IVM.floor, [(-1000, 1000)], typesComplex, oneArgDims),
-    Funb(IVM.round, [(-1000, 1000)], typesComplex, oneArgDims),
-    Funb(IVM.trunc, [(-1000, 1000)], typesComplex, oneArgDims),
     # Funb(IVM.cis, [(-1000, 1000)], typesComplex, oneArgDims),
 
     # twoArgDims
@@ -189,13 +193,30 @@ configsComplexIVM = FunbArray([
     # Funb(IVM.erfcinv, [(0, 2)], typesComplex, oneArgDims),
     # Funb(IVM.lgamma, [(0, 1000)], typesComplex, oneArgDims),
     # Funb(IVM.gamma, [(0, 36)], typesComplex, oneArgDims),
+    # Funb(IVM.floor, [(-1000, 1000)], typesComplex, oneArgDims),
+    # Funb(IVM.round, [(-1000, 1000)], typesComplex, oneArgDims),
+    # Funb(IVM.trunc, [(-1000, 1000)], typesComplex, oneArgDims),
 
     ## twoArgDims
     # Funb(IVM.atan, [(-1, 1), (-1, 1)], typesComplex, twoArgDims),
     # Funb(IVM.hypot, [(-1000, 1000), (-1000, 1000)], typesComplex, twoArgDims),
 ])
-
+=#
 ################################################################
+# Performing Benchmarks
+println("\nBenchmarking Base Real Functions\n")
+benchmark!(configsRealBase)
 
-# do plotting
-plotBench()
+println("\nBenchmarking IntelVectorMath Real Functions\n")
+benchmark!(configsRealIVM)
+
+# benchmark!(configsComplexBase)
+# benchmark!(configsComplexIVM)
+
+bar(configsRealBase => configsRealIVM, uniqueType = true, dimAnnotation = false, uniqueDim = true, "Base" => "IntelVectorMath")
+# bar(configsComplexBase => configsComplexIVM,uniqueType = true, dimAnnotation = false, uniqueDim = true, "Base" => "IntelVectorMath")
+
+# dimplot([configsRealBase,configsRealIVM,["Base", "IntelVectorMath"])
+
+# only a subset
+dimplot([configsRealBase[3:4],configsRealIVM[3:4]],["Base", "IntelVectorMath"])
