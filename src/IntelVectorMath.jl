@@ -2,8 +2,8 @@ __precompile__()
 
 module IntelVectorMath
 
-export VML
-const VML = IntelVectorMath
+export IVM
+const IVM = IntelVectorMath
 
 # import Base: .^, ./
 using SpecialFunctions

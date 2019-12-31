@@ -1,4 +1,4 @@
-# IntelVectorMath 
+# IntelVectorMath
 [![Build Status](https://travis-ci.com/Crown421/IntelVectorMath.jl.svg?branch=master)](https://travis-ci.com/Crown421/IntelVectorMath.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/btdduqfsxux8fhsr?svg=true)](https://ci.appveyor.com/project/Crown421/IntelVectorMath-jl)
 
@@ -8,7 +8,7 @@ arithmetic and transcendental functions. Especially for large vectors it is ofte
 ## Basic install
 
 To use IntelVectorMath.jl, you must have the shared libraries of the Intel Vector Math Library avilable on your system.
-The easiest option is to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl) via 
+The easiest option is to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl) via
 ```julia
 julia> ] add https://github.com/JuliaComputing/MKL.jl.git
 ```
@@ -16,13 +16,13 @@ Alternatively you can install MKL directly [from intel](https://software.intel.c
 
 Note that intel MKL has a separate license, which you may want to check for commercial projects (see [FAQ]( https://software.intel.com/en-us/mkl/license-faq)).
 
-To install IntelVectorMath.jl run 
+To install IntelVectorMath.jl run
 ```julia
 julia> ] add https://github.com/JuliaMath/IntelVectorMath.jl
 ```
 
 ## Using IntelVectorMath
-After loading `IntelVectorMath`, you have the supported function listed below available to call, i.e. `IntelVectorMath.sin(rand(100))`. This should provide a significant speed-up over broadcasting the Base functions.
+After loading `IntelVectorMath`, you have the supported function listed below available to call, i.e. `IntelVectorMath.sin(rand(100))` or `IVM.sin(rand(100))` for short. This should provide a significant speed-up over broadcasting the Base functions.
 ```julia
 julia> using IntelVectorMath, BenchmarkTools
 
@@ -31,12 +31,12 @@ julia> a = randn(10^4);
 julia> @btime sin.($a);     # apply Base.sin to each element
   102.128 μs (2 allocations: 78.20 KiB)
 
-julia> @btime IntelVectorMath.sin($a);  # apply IntelVectorMath.sin to the whole array
+julia> @btime IVM.sin($a);  # apply IVM.sin to the whole array
   20.900 μs (2 allocations: 78.20 KiB)
 
 julia> b = similar(a);
 
-julia> @btime IntelVectorMath.sin!(b, a);  # in-place version 
+julia> @btime IVM.sin!(b, a);  # in-place version
   20.008 μs (0 allocations: 0 bytes)
 ```
 
@@ -50,7 +50,7 @@ julia> @btime sin($a);
 julia> ans ≈ sin.(a)
 true
 ```
-Calling `sin` on an array now calls the a IntelVectorMath function, while its action on scalars is unchanged. 
+Calling `sin` on an array now calls the a IntelVectorMath function, while its action on scalars is unchanged.
 
 #### Note:
 
@@ -61,7 +61,7 @@ julia> exp(ones(2,2))
  4.19453  3.19453
  3.19453  4.19453
 
-julia> IntelVectorMath.exp(ones(2,2))
+ julia> IVM.exp(ones(2,2))
 2×2 Array{Float64,2}:
  2.71828  2.71828
  2.71828  2.71828
@@ -101,7 +101,7 @@ Float64, while some also take complex numbers.
 ### Unary functions
 
 Allocating forms have signature `f(A)`. Mutating forms have signatures
-`f!(A)` (in place) and `f!(out, A)` (out of place). The last 9 functions have been moved from Base to `SpecialFunctions.jl` or have no Base equivalent. 
+`f!(A)` (in place) and `f!(out, A)` (out of place). The last 9 functions have been moved from Base to `SpecialFunctions.jl` or have no Base equivalent.
 
 Allocating | Mutating
 -----------|---------
@@ -143,7 +143,7 @@ Allocating | Mutating
 ### Binary functions
 
 Allocating forms have signature `f(A, B)`. Mutating forms have
-signature `f!(out, A, B)`. 
+signature `f!(out, A, B)`.
 
 Allocating | Mutating
 -----------|---------
@@ -154,7 +154,7 @@ Allocating | Mutating
 
 
 ## Next steps
-Next steps for this package 
+Next steps for this package
 * [x] Windows support
 * [x] Basic Testing
 * [x] Avoiding overloading base and optional overload function
@@ -165,10 +165,10 @@ Next steps for this package
 
 
 
-## Advanced 
-IntelVectorMath.jl works via Libdl which loads the relevant shared libraries. Libdl automatically finds the relevant libraries if the location of the binaries has been added to the system search paths. 
-This already taken care of if you use MKL.jl, but the stand-alone may require you to source `mklvars.sh`. The default command on Mac and Ubuntu is `source /opt/intel/mkl/bin/mklvars.sh intel64`. You may want to add this to your `.bashrc`. 
-Adding a new `*.conf` file in `/etc/ld.so.conf.d` also works, as the `intel-mkl-slim` package in the AUR does automatically. 
+## Advanced
+IntelVectorMath.jl works via Libdl which loads the relevant shared libraries. Libdl automatically finds the relevant libraries if the location of the binaries has been added to the system search paths.
+This already taken care of if you use MKL.jl, but the stand-alone may require you to source `mklvars.sh`. The default command on Mac and Ubuntu is `source /opt/intel/mkl/bin/mklvars.sh intel64`. You may want to add this to your `.bashrc`.
+Adding a new `*.conf` file in `/etc/ld.so.conf.d` also works, as the `intel-mkl-slim` package in the AUR does automatically.
 
 Further, IntelVectorMath.jl uses [CpuId.jl](https://github.com/m-j-w/CpuId.jl) to detect if your processor supports the newer `avx2` instructions, and if not defaults to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
-If the CPU feature detection does not work for you, please open an issue. 
+If the CPU feature detection does not work for you, please open an issue.
