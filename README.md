@@ -1,9 +1,10 @@
-# IntelVectorMath
-[![Build Status](https://travis-ci.com/Crown421/IntelVectorMath.jl.svg?branch=master)](https://travis-ci.com/Crown421/IntelVectorMath.jl)
+# IntelVectorMath.jl (formerly VML.jl)
+[![Build Status](https://travis-ci.com/JuliaMath/IntelVectorMath.jl.svg?branch=master)](https://travis-ci.com/JuliaMath/IntelVectorMath.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/btdduqfsxux8fhsr?svg=true)](https://ci.appveyor.com/project/Crown421/IntelVectorMath-jl)
 
-This package provides bindings to the Intel Vector Math Library for
-arithmetic and transcendental functions. Especially for large vectors it is often substantially faster than broadcasting Julia's built-in functions.
+This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://software.intel.com/en-us/node/521751).
+This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array. 
+Until Julia 0.6 the package was registered as `VML.jl`.
 
 ## Basic install
 
@@ -22,7 +23,9 @@ julia> ] add https://github.com/JuliaMath/IntelVectorMath.jl
 ```
 
 ## Using IntelVectorMath
-After loading `IntelVectorMath`, you have the supported function listed below available to call, i.e. `IntelVectorMath.sin(rand(100))` or `IVM.sin(rand(100))` for short. This should provide a significant speed-up over broadcasting the Base functions.
+After loading `IntelVectorMath`, you have the supported function listed below available to call, i.e. `IntelVectorMath.sin(rand(100))`. For convenience the alias `IVM` is exported, so after `using` the package you can also call  `IVM.sin(rand(100))` for short. 
+If you `import` the package, you can add this alias (or any other) via `const IVM = IntelVectorMath`.
+This should provide a significant speed-up over broadcasting the Base functions.
 ```julia
 julia> using IntelVectorMath, BenchmarkTools
 
