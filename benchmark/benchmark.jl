@@ -102,8 +102,7 @@ configsRealIVM = FunbArray([
 # Complex Functions
 
 typesComplex=[Complex{Float32}, Complex{Float64}]
-# Uniform should support Complex input - Submit a PR to Distributions
-#=
+
 configsComplexBase = FunbArray([
     # oneArgDims
     Funb(acos, [(-1, 1)], typesComplex, oneArgDims),
@@ -201,22 +200,27 @@ configsComplexIVM = FunbArray([
     # Funb(IVM.atan, [(-1, 1), (-1, 1)], typesComplex, twoArgDims),
     # Funb(IVM.hypot, [(-1000, 1000), (-1000, 1000)], typesComplex, twoArgDims),
 ])
-=#
+
 ################################################################
 # Performing Benchmarks
+# Real
 println("\nBenchmarking Base Real Functions\n")
 benchmark!(configsRealBase)
 
 println("\nBenchmarking IntelVectorMath Real Functions\n")
 benchmark!(configsRealIVM)
 
-# benchmark!(configsComplexBase)
-# benchmark!(configsComplexIVM)
+bar(configsRealBase => configsRealIVM, uniqueType = true, dimAnnotation = false, uniqueDim = true, configName =  "Base" => "IntelVectorMath")
 
-bar(configsRealBase => configsRealIVM, uniqueType = true, dimAnnotation = false, uniqueDim = true, "Base" => "IntelVectorMath")
-# bar(configsComplexBase => configsComplexIVM,uniqueType = true, dimAnnotation = false, uniqueDim = true, "Base" => "IntelVectorMath")
+dimplot([configsRealBase,configsRealIVM],["Base", "IntelVectorMath"])
+################################################################
+# Complex
+println("\nBenchmarking Base Complex Functions\n")
+benchmark!(configsComplexBase)
 
-# dimplot([configsRealBase,configsRealIVM,["Base", "IntelVectorMath"])
+println("\nBenchmarking IntelVectorMath Complex Functions\n")
+benchmark!(configsComplexIVM)
 
-# only a subset
-dimplot([configsRealBase[3:4],configsRealIVM[3:4]],["Base", "IntelVectorMath"])
+bar(configsComplexBase => configsComplexIVM, uniqueType = true, dimAnnotation = false, uniqueDim = true, configName = "Base" => "IntelVectorMath")
+
+dimplot([configsComplexBase,configsComplexIVM],["Base", "IntelVectorMath"])

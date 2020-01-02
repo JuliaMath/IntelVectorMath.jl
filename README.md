@@ -89,11 +89,11 @@ regarding these options is available on
 ## Performance
 Relative speed of IntelVectorMath/Base
 
-![IntelVectorMath Performance Comparison](/benchmark/bar/bench-dims-set4-relative.png)
+![IntelVectorMath Performance Comparison](/benchmark/Real/bar/bench-dims-set4-relative.png)
 
-![IntelVectorMath Complex Performance Comparison](/benchmark/performance_complex.png)
+![IntelVectorMath Complex Performance Comparison](/benchmark/Complex/bar/bench-dims-set4-relative.png)
 
-![IntelVectorMath Performance over dimensions](/benchmark/dimplot/bench-atan-Type-Float32.png)
+![IntelVectorMath Performance over dimensions](/benchmark/Real/dimplot/bench-atan-Type-Float32.png)
 
 Tests were performed on an Intel(R) Core(TM) i5-8250U @ 1.6 [GHz] 1800 Mhz. The dashed line indicates equivalent performance for IntelVectorMath versus the implementations in Base.
 
