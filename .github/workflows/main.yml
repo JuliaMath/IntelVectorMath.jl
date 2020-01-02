@@ -1,7 +1,9 @@
 name: julia 1.0/1.3
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - master
+  pull_request:
     
 jobs:
   testMKLjl:

@@ -1,6 +1,8 @@
 name: julia nightly
 on:
   push:
+    branches:
+      - master
   pull_request:
   schedule:
     - cron:  '1 0 1,15 * *'
