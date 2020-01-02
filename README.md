@@ -1,6 +1,6 @@
 # IntelVectorMath.jl (formerly VML.jl)
-[![Build Status](https://travis-ci.com/JuliaMath/IntelVectorMath.jl.svg?branch=master)](https://travis-ci.com/JuliaMath/IntelVectorMath.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/btdduqfsxux8fhsr?svg=true)](https://ci.appveyor.com/project/Crown421/IntelVectorMath-jl)
+![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.0/1.3/badge.svg)
+![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://software.intel.com/en-us/node/521751).
 This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array. 
@@ -165,14 +165,16 @@ Next steps for this package
 * [x] Avoiding overloading base and optional overload function
 * [x] Travis and AppVeyor testing
 * [x] Adding CIS function
-* [ ] Updating Benchmarks
+* [x] Move Testing to GitHub Actions 
+* [x] Add test for using standalone MKL
+* [ ] Update Benchmarks
 * [ ] Add tests for mutating functions
-* [ ] Add test for using standalone MKL
+
 
 
 ## Advanced
 IntelVectorMath.jl works via Libdl which loads the relevant shared libraries. Libdl automatically finds the relevant libraries if the location of the binaries has been added to the system search paths.
-This already taken care of if you use MKL.jl, but the stand-alone may require you to source `mklvars.sh`. The default command on Mac and Ubuntu is `source /opt/intel/mkl/bin/mklvars.sh intel64`. You may want to add this to your `.bashrc`.
+This already taken care of if you use MKL.jl, but the stand-alone may require you to source `mklvars.sh` in the shell you are opening the REPL in. The default command on Mac and Ubuntu is `source /opt/intel/mkl/bin/mklvars.sh intel64`. You may want to add this to your `.bashrc`.
 Adding a new `*.conf` file in `/etc/ld.so.conf.d` also works, as the `intel-mkl-slim` package in the AUR does automatically.
 
 Further, IntelVectorMath.jl uses [CpuId.jl](https://github.com/m-j-w/CpuId.jl) to detect if your processor supports the newer `avx2` instructions, and if not defaults to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
