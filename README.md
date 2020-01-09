@@ -19,8 +19,9 @@ Note that intel MKL has a separate license, which you may want to check for comm
 
 To install IntelVectorMath.jl run
 ```julia
-julia> ] add https://github.com/JuliaMath/IntelVectorMath.jl
+julia> ] add https://github.com/JuliaMath/VML.jl
 ```
+(We are in the process of renaming the package and registering it, this path will should change soon.)
 
 ## Using IntelVectorMath
 After loading `IntelVectorMath`, you have the supported function listed below, for example `IntelVectorMath.sin(rand(100))`. These should provide a significant speed-up over broadcasting the Base functions.
