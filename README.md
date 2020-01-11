@@ -6,6 +6,8 @@ This package provides bindings to the Intel MKL [Vector Mathematics Functions](h
 This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array. 
 Until Julia 0.6 the package was registered as `VML.jl`.
 
+Similar packages are [Yeppp.jl](https://github.com/JuliaMath/Yeppp.jl), which wraps the open source Yeppp library, and [AppleAccelerate.jl](https://github.com/JuliaMath/AppleAccelerate.jl), which provides access to macOS's Accelerate framework.
+
 ## Basic install
 
 To use IntelVectorMath.jl, you must have the shared libraries of the Intel Vector Math Library available on your system.
@@ -19,8 +21,9 @@ Note that intel MKL has a separate license, which you may want to check for comm
 
 To install IntelVectorMath.jl run
 ```julia
-julia> ] add https://github.com/JuliaMath/IntelVectorMath.jl
+julia> ] add IntelVectorMath
 ```
+If you used this package prior to its renaming, you may have to run `] rm VML` first. Otherwise there will be a conflict due to the UUID.  
 
 ## Using IntelVectorMath
 After loading `IntelVectorMath`, you have the supported function listed below, for example `IntelVectorMath.sin(rand(100))`. These should provide a significant speed-up over broadcasting the Base functions.
