@@ -11,10 +11,9 @@ Similar packages are [Yeppp.jl](https://github.com/JuliaMath/Yeppp.jl), which wr
 ## Basic install
 
 To use IntelVectorMath.jl, you must have the shared libraries of the Intel Vector Math Library available on your system.
-The easiest option is to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl) via
-```julia
-julia> ] add https://github.com/JuliaComputing/MKL.jl.git
-```
+
+The easiest option may be to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl), but doing so will overwrite your built in julia sysimage to use MKL instead of OpenBLAS which could break compatability with certain packages and is difficult to reverse without reinstalling julia from scratch. 
+
 Alternatively you can install MKL directly [from intel](https://software.intel.com/en-us/mkl/choose-download).
 
 Note that intel MKL has a separate license, which you may want to check for commercial projects (see [FAQ]( https://software.intel.com/en-us/mkl/license-faq)).
