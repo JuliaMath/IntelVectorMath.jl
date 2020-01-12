@@ -1,6 +1,6 @@
 name = "IntelVectorMath"
 uuid = "c8ce9da6-5d36-5c03-b118-5a70151be7bc"
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 CpuId = "adafc99b-e345-5852-983c-f28acb93d879"

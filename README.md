@@ -18,11 +18,11 @@ The easiest option is to use [MKL.jl](https://github.com/JuliaComputing/MKL.jl) 
 julia> ] add https://github.com/JuliaComputing/MKL.jl.git
 ```
 #### Note:
-This will overwrite your julia sysimage to use MKL instead of OpenBLAS which could break compatability with certain packages and is difficult to reverse without reinstalling julia from scratch. In addition, MKL.jl is currently broken on Windows, so you can only use the following option. Please see the MKL.jl repository for more information. 
+This will overwrite your julia sysimage to use MKL instead of OpenBLAS which could break compatability with certain packages and is difficult to reverse without reinstalling julia from scratch. In addition, MKL.jl is currently broken on Windows, so you can only use the following option. Please see the MKL.jl repository for more information.
 
 ### 2. Standalone MKL
 You can also install MKL directly [from intel](https://software.intel.com/en-us/mkl/choose-download). For macOS and Windows this requires a free registration, on Linux this can be done via the command line, as seen [here](https://github.com/JuliaMath/IntelVectorMath.jl/blob/d4f8dd4083cf228cd493a4aed9964f1bc0f08d4f/.github/workflows/main.yml#L53).
-There is also the `intel-mkl-slim` package in the AUR that works well. 
+There is also the `intel-mkl-slim` package in the AUR that works well.
 
 Note that intel MKL has a separate license, which you may want to check for commercial projects (see [FAQ]( https://software.intel.com/en-us/mkl/license-faq)).
 
@@ -33,7 +33,7 @@ julia> ] add IntelVectorMath
 ```
 If you used this package prior to its renaming, you may have to run `] rm VML` first. Otherwise there will be a conflict due to the UUID.  
 
-In the event that MKL was not installed properly you will get an error when first `using` it. 
+In the event that MKL was not installed properly you will get an error when first `using` it.
 
 ## Using IntelVectorMath
 After loading `IntelVectorMath`, you have the supported function listed below, for example `IntelVectorMath.sin(rand(100))`. These should provide a significant speed-up over broadcasting the Base functions.
@@ -249,9 +249,9 @@ Next steps for this package
 * [x] Avoiding overloading base and optional overload function
 * [x] Travis and AppVeyor testing
 * [x] Adding CIS function
-* [x] Move Testing to GitHub Actions 
+* [x] Move Testing to GitHub Actions
 * [x] Add test for using standalone MKL
-* [ ] Update Benchmarks
+* [x] Update Benchmarks
 * [ ] Add tests for mutating functions
 
 
