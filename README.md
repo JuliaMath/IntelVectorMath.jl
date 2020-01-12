@@ -3,7 +3,7 @@
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://software.intel.com/en-us/node/521751).
-This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array. 
+This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array.
 Until Julia 0.6 the package was registered as `VML.jl`.
 
 Similar packages are [Yeppp.jl](https://github.com/JuliaMath/Yeppp.jl), which wraps the open source Yeppp library, and [AppleAccelerate.jl](https://github.com/JuliaMath/AppleAccelerate.jl), which provides access to macOS's Accelerate framework.
@@ -37,8 +37,8 @@ In the event that MKL was not installed properly you will get an error when firs
 
 ## Using IntelVectorMath
 After loading `IntelVectorMath`, you have the supported function listed below, for example `IntelVectorMath.sin(rand(100))`. These should provide a significant speed-up over broadcasting the Base functions.
-Since the package name is quite long, an alias `IVM` is also exported to allow `IVM.sin(rand(100))` after `using` the package. 
-If you `import` the package, you can add this alias via `const IVM = IntelVectorMath`. Equally, you can replace `IVM` with another alias of your choice. 
+Since the package name is quite long, an alias `IVM` is also exported to allow `IVM.sin(rand(100))` after `using` the package.
+If you `import` the package, you can add this alias via `const IVM = IntelVectorMath`. Equally, you can replace `IVM` with another alias of your choice.
 
 #### Example
 ```julia
@@ -100,16 +100,87 @@ regarding these options is available on
 [Intel's website](http://software.intel.com/sites/products/documentation/hpc/mkl/IntelVectorMath/vmldata.htm).
 
 ## Performance
-(These results are currently outdated and will be updated in due course)
-![IntelVectorMath Performance Comparison](/benchmark/performance.png)
+Summary of Results:
 
-![IntelVectorMath Complex Performance Comparison](/benchmark/performance_complex.png)
+Relative speed of IntelVectorMath/Base
 
-Tests were performed on an Intel(R) Core(TM) i7-3930K CPU. Error bars
-are 95% confidence intervals based on 25 repetitions of each test with
-a 1,000,000 element vector. The dashed line indicates equivalent
-performance for IntelVectorMath versus the implementations in Base. Both Base and
-IntelVectorMath use only a single core when performing these benchmarks.
+![IntelVectorMath Performance Comparison](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set6-relative.png)
+
+![IntelVectorMath Complex Performance Comparison](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set6-relative.png)
+
+Full Results:
+
+<details>
+  <summary>Real Functions - Full Benchmark Results</summary>
+
+  ![Dimension set 1](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set1-relative.png)
+  ![Dimension set 2](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set2-relative.png)
+  ![Dimension set 3](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set3-relative.png)
+  ![Dimension set 4](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set4-relative.png)
+  ![Dimension set 5](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set5-relative.png)
+  ![Dimension set 6](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set6-relative.png)
+  ![Dimension set 7](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set7-relative.png)
+  ![Dimension set 8](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set8-relative.png)
+  ![Dimension set 9](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set9-relative.png)
+  ![Dimension set 10](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set10-relative.png)
+
+</details>
+
+<details>
+  <summary>Complex Functions - Full Benchmark Results</summary>
+
+  ![Dimension set 1](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set1-relative.png)
+  ![Dimension set 2](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set2-relative.png)
+  ![Dimension set 3](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set3-relative.png)
+  ![Dimension set 4](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set4-relative.png)
+  ![Dimension set 5](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set5-relative.png)
+  ![Dimension set 6](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set6-relative.png)
+  ![Dimension set 7](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set7-relative.png)
+  ![Dimension set 8](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set8-relative.png)
+  ![Dimension set 9](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set9-relative.png)
+  ![Dimension set 10](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set10-relative.png)
+
+</details>
+
+<details>
+  <summary>Real Functions - Performance over dimensions</summary>
+
+  ![abs](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-abs-Type-Float64.png)
+  ![abs2](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-abs2-Type-Float64.png)
+  ![acos](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-acos-Type-Float64.png)
+  ![acosh](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-acosh-Type-Float64.png)
+  ![asin](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-asin-Type-Float64.png)
+  ![asinh](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-asinh-Type-Float64.png)
+  ![atan](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-atan-Type-Float64.png)
+  ![atanh](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-atanh-Type-Float64.png)
+  ![cbrt](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-cbrt-Type-Float64.png)
+  ![ceil](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-ceil-Type-Float64.png)
+  ![cis](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-cis-Type-Float64.png)
+  ![cos](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-cos-Type-Float64.png)
+  ![cosh](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-cosh-Type-Float64.png)
+  ![erf](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-erf-Type-Float64.png)
+  ![erfc](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-erfc-Type-Float64.png)
+  ![erfcinv](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-erfcinv-Type-Float64.png)
+  ![erfcinv](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-erfcinv-Type-Float64.png)
+  ![exp](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-exp-Type-Float64.png)
+  ![expm1](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-expm1-Type-Float64.png)
+  ![floor](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-floor-Type-Float64.png)
+  ![gamma](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-gamma-Type-Float64.png)
+  ![hypot](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-hypot-Type-Float64.png)
+  ![log](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-log-Type-Float64.png)
+  ![round](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-round-Type-Float64.png)
+  ![sin](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-sin-Type-Float64.png)
+  ![sinh](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-sinh-Type-Float64.png)
+  ![sqrt](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-sqrt-Type-Float64.png)
+  ![tan](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-tan-Type-Float64.png)
+  ![tanh](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-tanh-Type-Float64.png)
+  ![trunc](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/dimplot/bench-trunc-Type-Float64.png)
+
+</details>
+
+<br/>
+
+Tests were performed on an Intel(R) Core(TM) i5-8250U @ 1.6 [GHz] 1800 Mhz. The dashed line indicates equivalent performance for IntelVectorMath versus the implementations in Base.
 
 ## Supported functions
 
