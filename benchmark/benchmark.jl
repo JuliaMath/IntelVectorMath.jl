@@ -2,6 +2,7 @@ using IntelVectorMath, SpecialFunctions
 using AcuteBenchmark
 
 cd(@__DIR__)
+rootPath = pwd()
 ################################################################
 # Dimensions
 oneArgDims = [10 20 50 100 200 500 700 1000 5000 10000]
@@ -210,6 +211,8 @@ benchmark!(configsRealBase)
 println("\nBenchmarking IntelVectorMath Real Functions\n")
 benchmark!(configsRealIVM)
 
+cd(joinpath(rootPath,"Real"))
+
 bar(configsRealBase => configsRealIVM, uniqueType = true, dimAnnotation = false, uniqueDim = true, configName =  "Base" => "IntelVectorMath")
 
 dimplot([configsRealBase,configsRealIVM],["Base", "IntelVectorMath"])
@@ -220,6 +223,8 @@ benchmark!(configsComplexBase)
 
 println("\nBenchmarking IntelVectorMath Complex Functions\n")
 benchmark!(configsComplexIVM)
+
+cd(joinpath(rootPath,"Complex"))
 
 bar(configsComplexBase => configsComplexIVM, uniqueType = true, dimAnnotation = false, uniqueDim = true, configName = "Base" => "IntelVectorMath")
 
