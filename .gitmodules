@@ -1,3 +1,0 @@
-[submodule "benchmark-result"]
-	path = benchmark-result
-	url = git@github.com:aminya/AcuteBenchmark-Results.git
