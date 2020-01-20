@@ -102,11 +102,12 @@ regarding these options is available on
 ## Performance
 Summary of Results:
 
-Relative speed of IntelVectorMath/Base
+**Relative speed of IntelVectorMath/Base:** The height of the bars is how fast IntelVectorMath is compared to using broadcasting for functions in Base
 
 ![IntelVectorMath Performance Comparison](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Real/bar/bench-dims-set6-relative.png)
 
 ![IntelVectorMath Complex Performance Comparison](https://raw.githubusercontent.com/aminya/AcuteBenchmark-Results/master/IntelVectorMath/Complex/bar/bench-dims-set6-relative.png)
+
 
 Full Results:
 
