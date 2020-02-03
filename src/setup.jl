@@ -1,17 +1,10 @@
 
 function __init__()
-    MKLpkgid = Base.PkgId(Base.UUID("33e6dc65-8f57-5167-99aa-e5a354878fb2"), "MKL")
-    mklpath = Base.locate_package(MKLpkgid)
-    if mklpath != nothing
-        libpath = normpath(joinpath(dirname(mklpath), "../deps/usr/lib"))
-        push!(Libdl.DL_LOAD_PATH, libpath)
-    elseif isempty(Libdl.find_library(rtlib))
-        error("Could not find MKL shared libraries. Please add MKL.jl or install MKL via the intel website. See the github repository for more details.)")
-    end
+    check_deps()
 
-    Libdl.dlopen(rtlib, RTLD_GLOBAL)
-    Libdl.dlopen(corelib, RTLD_GLOBAL) # maybe only needed on mac
-    Libdl.dlopen(lib, RTLD_GLOBAL)
+    Libdl.dlopen(libmkl_core, Libdl.RTLD_GLOBAL)
+    Libdl.dlopen(libmkl_rt, Libdl.RTLD_GLOBAL) # maybe only needed on mac
+    Libdl.dlopen(libmkl_vml_avx, Libdl.RTLD_GLOBAL)
 
 end
 
@@ -30,15 +23,15 @@ const _BINARY = []
 
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
-vml_get_mode() = ccall((:_vmlGetMode, lib), Cuint, ())
-vml_set_mode(mode::Integer) = (ccall((:_vmlSetMode, lib), Cuint, (UInt,), mode); nothing)
+vml_get_mode() = ccall((:_vmlGetMode, libmkl_vml_avx), Cuint, ())
+vml_set_mode(mode::Integer) = (ccall((:_vmlSetMode, libmkl_vml_avx), Cuint, (UInt,), mode); nothing)
 
 vml_set_accuracy(m::VMLAccuracy) = vml_set_mode((vml_get_mode() & ~0x03) | m.mode)
 vml_get_accuracy() = VMLAccuracy(vml_get_mode() & 0x3)
 
 vml_set_mode((vml_get_mode() & ~0x0000FF00))
 function vml_check_error()
-    vml_error = ccall((:_vmlClearErrStatus, lib), Cint, ())
+    vml_error = ccall((:_vmlClearErrStatus, libmkl_vml_avx), Cint, ())
     if vml_error != 0
         if vml_error == 1
             throw(DomainError(-1, "This function does not support arguments outside its domain"))
@@ -76,7 +69,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
     @eval begin
         function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}) where {N}
             size(out) == size(A) || throw(DimensionMismatch())
-            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
             return out
         end
@@ -91,7 +84,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
         end)
         function ($jlname)(A::Array{$tin})
             out = similar(A, $tout)
-            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
             return out
         end
@@ -109,14 +102,14 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
         $(isempty(exports) ? nothing : Expr(:export, exports...))
         function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}, B::Array{$tin,N}) where {N}
             size(out) == size(A) == size(B) || $(broadcast ? :(return broadcast!($jlname, out, A, B)) : :(throw(DimensionMismatch())))
-            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
         function ($jlname)(A::Array{$tout,N}, B::Array{$tin,N}) where {N}
             size(A) == size(B) || $(broadcast ? :(return broadcast($jlname, A, B)) : :(throw(DimensionMismatch())))
             out = similar(A)
-            ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
