@@ -7,8 +7,8 @@ const IVM = IntelVectorMath
 
 # import Base: .^, ./
 using SpecialFunctions
-using Libdl
-include(joinpath(dirname(@__DIR__), "deps/deps.jl"))
+# using Libdl
+include("../deps/deps.jl")
 
 include("setup.jl")
 

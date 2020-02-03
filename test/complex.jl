@@ -19,11 +19,24 @@ fns = [x[1:2] for x in base_unary_complex]
 
     base_fn = eval(:($(fns[i][1]).$(fns[i][2]))) 
     vml_fn = eval(:(IntelVectorMath.$(fns[i][2])))
+    vml_fn! = eval(:(IntelVectorMath.$(Symbol(fns[i][2], !))))
 
     Test.@test which(vml_fn, typeof(input[t][i])).module == IntelVectorMath
 
     # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
-    Test.@test vml_fn(input[t][i]...) ≈ base_fn.(input[t][i]...)
+    baseres = base_fn.(input[t][i]...)
+    Test.@test vml_fn(input[t][i]...) ≈ baseres
+
+    if length(input[t][i]) == 1
+      if fns[i][2] != :abs && fns[i][2] != :angle
+        vml_fn!(input[t][i]...)
+        Test.@test input[t][i][1] ≈ baseres
+      end
+    elseif length(input[t][i]) == 2
+      out = similar(input[t][i][1])
+      vml_fn!(out, input[t][i]...)
+      Test.@test out ≈ baseres
+    end
 
   end
 
