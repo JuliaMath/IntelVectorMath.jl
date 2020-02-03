@@ -76,7 +76,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
         $(if tin == tout
             quote
                 function $(jlname!)(A::Array{$tin})
-                    ccall(($mklfn, lib), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
+                    ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
                     vml_check_error()
                     return A
                 end
