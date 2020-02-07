@@ -1,4 +1,9 @@
 # IntelVectorMath.jl (formerly VML.jl)
+
+[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/I/IntelVectorMath.svg
+[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
+
+[![PkgEval][pkgeval-img]][pkgeval-url]
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.0/1.3/badge.svg)
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
 
