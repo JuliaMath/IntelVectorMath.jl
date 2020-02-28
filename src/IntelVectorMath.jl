@@ -1,12 +1,9 @@
-__precompile__()
-
 module IntelVectorMath
 
 export IVM
 const IVM = IntelVectorMath
 
 # import Base: .^, ./
-using SpecialFunctions
 # using Libdl
 include("../deps/deps.jl")
 
@@ -105,46 +102,40 @@ for t in (Float32, Float64)
 end
 
 """
-    @overload exp log sin
+    @vml_overload Base.exp Base.log SpecialFunctions.erfc
 
-This macro adds a method to each function in `Base` (or perhaps in `SpecialFunctions`),
-so that when acting on an array (or two arrays) it calls the `IntelVectorMath` function of the same name.
-
-The existing action on scalars is unaffected. However, `exp(M::Matrix)` will now mean
-element-wise `IntelVectorMath.exp(M) == exp.(M)`, rather than matrix exponentiation.
+This macro adds a method to each given function in `Base` or `SpecialFunctions`,
+so that when acting on a `Vector` (or two `Vector`s) it calls the `IntelVectorMath` function of the same name.
 """
-macro overload(funs...)
+macro vml_overload(funs...)
     out = quote end
-    say = []
     for f in funs
-        if f in _UNARY
-            if isdefined(Base, f)
-                push!(out.args, :( Base.$f(A::Array) = IntelVectorMath.$f(A) ))
-                push!(say, "Base.$f(A)")
-            elseif isdefined(SpecialFunctions, f)
-                push!(out.args, :( IntelVectorMath.SpecialFunctions.$f(A::Array) = IntelVectorMath.$f(A) ))
-                push!(say, "SpecialFunctions.$f(A)")
-            else
-                @error "function IntelVectorMath.$f is not defined in Base or SpecialFunctions, so there is nothing to overload"
-            end
+        if f.head !== :(.) || !(length(f.args) == 2) || !(f.args[1] isa Symbol && f.args[2] isa QuoteNode)
+            error("expected a Module.function type of expression, got $f")
         end
-        if f in _BINARY
-            if isdefined(Base, f)
-                push!(out.args, :( Base.$f(A::Array, B::Array) = IntelVectorMath.$f(A, B) ))
-                push!(say, "Base.$f(A, B)")
-            else
-                @error "function IntelVectorMath.$f is not defined in Base, so there is nothing to overload"
-            end
+        mod, f = f.args[1], f.args[2].value
+        if !(mod in (:Base, :SpecialFunctions))
+             error("expected module to be either Base or SpecialFunctions, got $mod")
         end
-        if !(f in _UNARY) && !(f in _BINARY)
-            error("there is no function $f defined by IntelVectorMath.jl")
+        if f in keys(_UNARY)
+            input_types = _UNARY[f]
+            expr = :($(esc(mod)).$f(A::Vector{T}) where {T <: Union{$(input_types...)}} =
+                     IntelVectorMath.$f(A))
+            push!(out.args, expr)
+        end
+        if f in keys(_BINARY)
+            input_types = _BINARY[f]
+            expr = :($(esc(mod)).$f(A::Vector{T}, B::Vector{T}) where {T <: Union{$(input_types...)}} =
+                     IntelVectorMath.$f(A, B))
+            push!(out.args, expr)
+        end
+        if !(f in keys(_UNARY)) && !(f in keys(_BINARY))
+            error("there is no function $f defined in IntelVectorMath.jl")
         end
     end
-    str = string("Overloaded these functions: \n  ", join(say, " \n  "))
-    push!(out.args, str)
-    esc(out)
+    return out
 end
 
-export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy, @overload
+export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy, @vml_overload
 
 end

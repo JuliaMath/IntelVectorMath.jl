@@ -18,8 +18,8 @@ const VML_LA = VMLAccuracy(0x00000001)
 const VML_HA = VMLAccuracy(0x00000002)
 const VML_EP = VMLAccuracy(0x00000003)
 
-const _UNARY = [] # for @overload to check
-const _BINARY = []
+const _UNARY = Dict{Symbol, Vector{DataType}}() # for @vml_overload to check
+const _BINARY = Dict{Symbol, Vector{DataType}}()
 
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
@@ -59,13 +59,13 @@ function vml_prefix(t::DataType)
     error("unknown type $t")
 end
 
-function def_unary_op(tin, tout, jlname, jlname!, mklname; 
+function def_unary_op(tin, tout, jlname, jlname!, mklname;
         vmltype = tin)
     mklfn = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$mklname"))
     exports = Symbol[]
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
-    push!(_UNARY, jlname)
+    push!(get!(_UNARY, jlname, DataType[]), tin)
     @eval begin
         function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}) where {N}
             size(out) == size(A) || throw(DimensionMismatch())
@@ -97,7 +97,7 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
     exports = Symbol[]
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
-    push!(_BINARY, jlname)
+    push!(get!(_BINARY, jlname, DataType[]), tin)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
         function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}, B::Array{$tin,N}) where {N}
