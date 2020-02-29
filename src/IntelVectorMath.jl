@@ -6,9 +6,6 @@ export IVM
 const IVM = IntelVectorMath
 
 # import Base: .^, ./
-# using Libdl
-include("../deps/deps.jl")
-
 include("setup.jl")
 
 for t in (Float32, Float64, ComplexF32, ComplexF64)
