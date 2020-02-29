@@ -1,3 +1,4 @@
+import MKL_jll
 using Test
 using IntelVectorMath
 
