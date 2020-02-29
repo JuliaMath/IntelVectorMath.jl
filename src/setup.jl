@@ -17,7 +17,6 @@ vml_set_mode(mode::Integer) = (ccall((:vmlSetMode, MKL_jll.libmkl_rt), Cuint, (U
 vml_set_accuracy(m::VMLAccuracy) = vml_set_mode((vml_get_mode() & ~0x03) | m.mode)
 vml_get_accuracy() = VMLAccuracy(vml_get_mode() & 0x3)
 
-vml_set_mode((vml_get_mode() & ~0x0000FF00))
 function vml_check_error()
     vml_error = ccall((:vmlClearErrStatus, MKL_jll.libmkl_rt), Cint, ())
     if vml_error != 0
