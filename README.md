@@ -19,8 +19,9 @@ To install IntelVectorMath.jl run
 ```julia
 julia> ] add IntelVectorMath
 ```
-Since version 0.3 IntelVectorMath downloads its own version of MKL and keeps only the required files in its own directory. As such installing MKL.jl or MKL via intel are no longer required, and may mean some duplicate files if they are present. However, this package will adopt the new artifact system in the next minor version update and fix this issue. 
+Since version 0.4 `IntelVectorMath` uses the `MKL_jll` artifact, which is shared with other packages uses MKL, removing several other dependencies. This has the side effect that from version 0.4 onwards this package requires at least Julia 1.3. 
 
+For older versions of Julia `IntelVectorMath v0.3` downloads its own version of MKL and keeps only the required files in its own directory. As such installing MKL.jl or MKL via intel are no longer required, and may mean some duplicate files if they are present. However, this package will adopt the new artifact system in the next minor version update and fix this issue. 
 In the event that MKL was not installed properly you will get an error when first `using` it. Please try running 
 ```julia
 julia> ] build IntelVectorMath
