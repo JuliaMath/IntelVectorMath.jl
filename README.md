@@ -53,37 +53,6 @@ julia> @btime IVM.sin!(b, a);  # in-place version
   20.008 μs (0 allocations: 0 bytes)
 ```
 
-Most Julia functions do not automatically apply to all elements of an array, thus `sin(a)` gives a MethodError.  If you would like to extend the Base function with this functionality, you can add methods to them with the `@overload` macro:
-```julia
-julia> @overload sin cos tan;
-
-julia> @btime sin($a);
-  20.944 μs (2 allocations: 78.20 KiB)
-
-julia> ans ≈ sin.(a)
-true
-```
-Calling `sin` on an array now calls the a IntelVectorMath function, while its action on scalars is unchanged.
-
-#### Note:
-
-Some Julia functions like `exp` and `log` do operate on matrices, and refer to the [matrix exponential](https://en.wikipedia.org/wiki/Matrix_exponential) and logarithm. Using `@overload exp` will overwrite this behaviour with element-wise exponentiation/ logarithm.
-```julia
-julia> exp(ones(2,2))
-2×2 Array{Float64,2}:
- 4.19453  3.19453
- 3.19453  4.19453
-
- julia> IVM.exp(ones(2,2))
-2×2 Array{Float64,2}:
- 2.71828  2.71828
- 2.71828  2.71828
-
-julia> ans == exp.(ones(2,2))
-true
-```
-If your code, or any code you call, uses matrix exponentiation, then `@overload exp` may silently lead to incorrect results. This caution applies to all trigonometric functions, too, since they have matrix forms defined by matrix exponentials.
-
 ### Accuracy
 
 By default, IntelVectorMath uses `VML_HA` mode, which corresponds to an accuracy of
