@@ -9,8 +9,9 @@ const IVM = IntelVectorMath
 include("setup.jl")
 
 function __init__()
-    if Sys.isapple() && :SpecialFunctions in names(Main; imported = true)
-        @warn "It appears SpecialFunctions was loaded prior to this package, which currently on mac may lead to wrong results. For further details see github.com/JuliaMath/IntelVectorMath.jl"
+    compilersupportlibaries_jll_uuid = Base.UUID("e66e0078-7015-5450-92f7-15fbd957f2ae")
+    if Sys.isapple() && haskey(Base.loaded_modules, Base.PkgId(compilersupportlibaries_jll_uuid, "CompilerSupportLibraries_jll"))
+        @warn "It appears CompilerSupportLibraries_jll was loaded prior to this package, which currently on mac may lead to wrong results in some cases. For further details see github.com/JuliaMath/IntelVectorMath.jl"
     end
 end
 
