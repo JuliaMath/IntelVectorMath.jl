@@ -1,7 +1,7 @@
 # First generate some random data and test functions in Base on it
 const NVALS = 1000
 
-input = Dict(
+const input = Dict(
     t=>[
         [ (randindomain(t, NVALS, domain),) for (_, _, domain) in base_unary_real ];
         [ (randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
@@ -10,34 +10,34 @@ input = Dict(
     for t in (Float32, Float64)
 )
 
-fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_real]]
+const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_real]]
 
 # output = Dict(t=>[fns[i](input[t][i]...) for i = 1:length(fns)] for t in (Float32, Float64))
 
 @testset "Definitions and Comparison with Base for Reals" begin
 
   for t in (Float32, Float64), i = 1:length(fns)
-    base_fn = eval(:($(fns[i][1]).$(fns[i][2])))
-    vml_fn = eval(:(IntelVectorMath.$(fns[i][2])))
-    vml_fn! = eval(:(IntelVectorMath.$(Symbol(fns[i][2], !))))
+    inp = input[t][i]
+    mod, fn = fns[i]
+    base_fn = getproperty(mod, fn)
+    vml_fn = getproperty(IntelVectorMath, fn)
+    vml_fn! = getproperty(IntelVectorMath, Symbol(fn, "!"))
 
-    Test.@test which(vml_fn, typeof(input[t][i])).module == IntelVectorMath
+    Test.@test parentmodule(vml_fn) == IntelVectorMath
 
     # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
-    baseres = base_fn.(input[t][i]...)
-    Test.@test vml_fn(input[t][i]...) ≈ baseres
+    baseres = base_fn.(inp...)
+    Test.@test vml_fn(inp...) ≈ base_fn.(inp...)
 
     # cis changes type (float to complex, does not have mutating function)
-
-
-    if length(input[t][i]) == 1
-      if fns[i][2] != :cis
-        vml_fn!(input[t][i]...)
-        Test.@test input[t][i][1] ≈ baseres
+    if length(inp) == 1
+      if fn != :cis
+        vml_fn!(inp[1])
+        Test.@test inp[1] ≈ baseres
       end
-    elseif length(input[t][i]) == 2
-      out = similar(input[t][i][1])
-      vml_fn!(out, input[t][i]...)
+    elseif length(inp) == 2
+      out = similar(inp[1])
+      vml_fn!(out, inp...)
       Test.@test out ≈ baseres
     end
 
