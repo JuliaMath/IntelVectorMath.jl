@@ -13,6 +13,9 @@ Until Julia 0.6 the package was registered as `VML.jl`.
 
 Similar packages are [Yeppp.jl](https://github.com/JuliaMath/Yeppp.jl), which wraps the open source Yeppp library, and [AppleAccelerate.jl](https://github.com/JuliaMath/AppleAccelerate.jl), which provides access to macOS's Accelerate framework.
 
+### Warning for macOS
+There is currently [the following](https://github.com/JuliaPackaging/BinaryBuilder.jl/issues/700) issue between the artifacts used by `SpecialFunctions.jl` and `MKL_jll`. Unless `IntelVectorMath` is loaded first, there might be wrong results coming from a small number of function for particular input array lengths. 
+
 ## Basic install
 
 To install IntelVectorMath.jl run

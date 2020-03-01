@@ -8,6 +8,12 @@ const IVM = IntelVectorMath
 # import Base: .^, ./
 include("setup.jl")
 
+function __init__()
+    if Sys.isapple() && :SpecialFunctions in names(Main; imported = true)
+        @warn "It appears SpecialFunctions was loaded prior to this package, which currently on mac may lead to wrong results. For further details see github.com/JuliaMath/IntelVectorMath.jl"
+    end
+end
+
 for t in (Float32, Float64, ComplexF32, ComplexF64)
     # Unary, real or complex
     def_unary_op(t, t, :acos, :acos!, :Acos)
