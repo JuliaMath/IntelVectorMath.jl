@@ -17,7 +17,7 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
 @testset "Definitions and Comparison with Base for Reals" begin
 
   for t in (Float32, Float64), i = 1:length(fns)
-  inp = input[t][i]
+    inp = input[t][i]
     mod, fn = fns[i]
     base_fn = getproperty(mod, fn)
     vml_fn = getproperty(IntelVectorMath, fn)
@@ -30,13 +30,12 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
     Test.@test vml_fn(inp...) ≈ base_fn.(inp...)
 
     # cis changes type (float to complex, does not have mutating function)
-
     if length(inp) == 1
       if fn != :cis
         vml_fn!(inp[1])
         Test.@test inp[1] ≈ baseres
       end
-  elseif length(inp) == 2
+    elseif length(inp) == 2
       out = similar(inp[1])
       vml_fn!(out, inp...)
       Test.@test out ≈ baseres
@@ -58,18 +57,5 @@ end
 
   vml_set_accuracy(VML_EP)
   Test.@test vml_get_accuracy() == VML_EP
-
-end
-
-@testset "@overload macro" begin
-
-    @test IntelVectorMath.exp([1.0]) ≈ exp.([1.0])
-    @test_throws MethodError Base.exp([1.0])
-    @test (@overload log exp) isa String
-    @test Base.exp([1.0]) ≈ exp.([1.0])
-
-    @test_throws MethodError Base.atan([1.0], [2.0])
-    @test (@overload atan) isa String
-    @test Base.atan([1.0], [2.0]) ≈ atan.([1.0], [2.0])
 
 end

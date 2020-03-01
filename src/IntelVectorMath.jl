@@ -6,7 +6,6 @@ export IVM
 const IVM = IntelVectorMath
 
 # import Base: .^, ./
-using SpecialFunctions
 # using Libdl
 include("../deps/deps.jl")
 
@@ -104,47 +103,6 @@ for t in (Float32, Float64)
     # def_binary_op(Complex{t}, Complex{t}, :multiply_conj, :multiply_conj!, :Mul, false)
 end
 
-"""
-    @overload exp log sin
-
-This macro adds a method to each function in `Base` (or perhaps in `SpecialFunctions`),
-so that when acting on an array (or two arrays) it calls the `IntelVectorMath` function of the same name.
-
-The existing action on scalars is unaffected. However, `exp(M::Matrix)` will now mean
-element-wise `IntelVectorMath.exp(M) == exp.(M)`, rather than matrix exponentiation.
-"""
-macro overload(funs...)
-    out = quote end
-    say = []
-    for f in funs
-        if f in _UNARY
-            if isdefined(Base, f)
-                push!(out.args, :( Base.$f(A::Array) = IntelVectorMath.$f(A) ))
-                push!(say, "Base.$f(A)")
-            elseif isdefined(SpecialFunctions, f)
-                push!(out.args, :( IntelVectorMath.SpecialFunctions.$f(A::Array) = IntelVectorMath.$f(A) ))
-                push!(say, "SpecialFunctions.$f(A)")
-            else
-                @error "function IntelVectorMath.$f is not defined in Base or SpecialFunctions, so there is nothing to overload"
-            end
-        end
-        if f in _BINARY
-            if isdefined(Base, f)
-                push!(out.args, :( Base.$f(A::Array, B::Array) = IntelVectorMath.$f(A, B) ))
-                push!(say, "Base.$f(A, B)")
-            else
-                @error "function IntelVectorMath.$f is not defined in Base, so there is nothing to overload"
-            end
-        end
-        if !(f in _UNARY) && !(f in _BINARY)
-            error("there is no function $f defined by IntelVectorMath.jl")
-        end
-    end
-    str = string("Overloaded these functions: \n  ", join(say, " \n  "))
-    push!(out.args, str)
-    esc(out)
-end
-
-export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy, @overload
+export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
 
 end

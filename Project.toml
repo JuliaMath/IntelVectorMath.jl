@@ -1,21 +1,21 @@
 name = "IntelVectorMath"
 uuid = "c8ce9da6-5d36-5c03-b118-5a70151be7bc"
-version = "0.3"
+version = "0.3.0"
 
 [deps]
 BinaryProvider = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
 CpuId = "adafc99b-e345-5852-983c-f28acb93d879"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
-SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
 BinaryProvider = "0.5.8"
 CpuId = "0.2"
-SpecialFunctions = "0.8, 0.9, 0.10"
 julia = "0.7, 1.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+
 
 [targets]
-test = ["Test"]
+test = ["Test", "SpecialFunctions"]
