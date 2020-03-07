@@ -1,6 +1,5 @@
 
 function __init__()
-    check_deps()
 
     Libdl.dlopen(libmkl_core, Libdl.RTLD_GLOBAL)
     Libdl.dlopen(libmkl_rt, Libdl.RTLD_GLOBAL) # maybe only needed on mac
