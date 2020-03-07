@@ -4,7 +4,7 @@
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
 
 [![PkgEval][pkgeval-img]][pkgeval-url]
-![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.0/1.3/badge.svg)
+![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.3/badge.svg)
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://software.intel.com/en-us/node/521751).
@@ -13,14 +13,18 @@ Until Julia 0.6 the package was registered as `VML.jl`.
 
 Similar packages are [Yeppp.jl](https://github.com/JuliaMath/Yeppp.jl), which wraps the open source Yeppp library, and [AppleAccelerate.jl](https://github.com/JuliaMath/AppleAccelerate.jl), which provides access to macOS's Accelerate framework.
 
+### Warning for macOS
+There is currently [the following](https://github.com/JuliaPackaging/BinaryBuilder.jl/issues/700) issue between the `CompilerSupportLibraries_jll` artifact, which is used for example by `SpecialFunctions.jl`, and `MKL_jll`. Unless `MKL_jll` is loaded first, there might be wrong results coming from a small number of function for particular input array lengths. If you are unsure which, if any, your used packages might load this artifact, loading `IntelVectorMath` as the very first package should be fine. 
+
 ## Basic install
 
 To install IntelVectorMath.jl run
 ```julia
 julia> ] add IntelVectorMath
 ```
-Since version 0.3 IntelVectorMath downloads its own version of MKL and keeps only the required files in its own directory. As such installing MKL.jl or MKL via intel are no longer required, and may mean some duplicate files if they are present. However, this package will adopt the new artifact system in the next minor version update and fix this issue. 
+Since version 0.4 `IntelVectorMath` uses the `MKL_jll` artifact, which is shared with other packages uses MKL, removing several other dependencies. This has the side effect that from version 0.4 onwards this package requires at least Julia 1.3. 
 
+For older versions of Julia `IntelVectorMath v0.3` downloads its own version of MKL and keeps only the required files in its own directory. As such installing MKL.jl or MKL via intel are no longer required, and may mean some duplicate files if they are present. However, this package will adopt the new artifact system in the next minor version update and fix this issue. 
 In the event that MKL was not installed properly you will get an error when first `using` it. Please try running 
 ```julia
 julia> ] build IntelVectorMath

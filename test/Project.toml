@@ -1,5 +1,5 @@
 [deps]
 CpuId = "adafc99b-e345-5852-983c-f28acb93d879"
-Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+MKL_jll = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

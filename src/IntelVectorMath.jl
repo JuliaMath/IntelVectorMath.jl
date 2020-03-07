@@ -6,10 +6,14 @@ export IVM
 const IVM = IntelVectorMath
 
 # import Base: .^, ./
-# using Libdl
-include("../deps/deps.jl")
-
 include("setup.jl")
+
+function __init__()
+    compilersupportlibaries_jll_uuid = Base.UUID("e66e0078-7015-5450-92f7-15fbd957f2ae")
+    if Sys.isapple() && haskey(Base.loaded_modules, Base.PkgId(compilersupportlibaries_jll_uuid, "CompilerSupportLibraries_jll"))
+        @warn "It appears CompilerSupportLibraries_jll was loaded prior to this package, which currently on mac may lead to wrong results in some cases. For further details see github.com/JuliaMath/IntelVectorMath.jl"
+    end
+end
 
 for t in (Float32, Float64, ComplexF32, ComplexF64)
     # Unary, real or complex

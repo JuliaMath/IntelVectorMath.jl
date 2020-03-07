@@ -1,14 +1,4 @@
-
-function __init__()
-    check_deps()
-
-    Libdl.dlopen(libmkl_core, Libdl.RTLD_GLOBAL)
-    Libdl.dlopen(libmkl_rt, Libdl.RTLD_GLOBAL) # maybe only needed on mac
-    Libdl.dlopen(libmkl_vml_avx, Libdl.RTLD_GLOBAL)
-
-end
-
-__init__()
+import MKL_jll
 
 struct VMLAccuracy
     mode::UInt
@@ -20,15 +10,15 @@ const VML_EP = VMLAccuracy(0x00000003)
 
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
-vml_get_mode() = ccall((:_vmlGetMode, libmkl_vml_avx), Cuint, ())
-vml_set_mode(mode::Integer) = (ccall((:_vmlSetMode, libmkl_vml_avx), Cuint, (UInt,), mode); nothing)
+                                              
+vml_get_mode() = ccall((:vmlGetMode, MKL_jll.libmkl_rt), Cuint, ())
+vml_set_mode(mode::Integer) = (ccall((:vmlSetMode, MKL_jll.libmkl_rt), Cuint, (UInt,), mode); nothing)
 
 vml_set_accuracy(m::VMLAccuracy) = vml_set_mode((vml_get_mode() & ~0x03) | m.mode)
 vml_get_accuracy() = VMLAccuracy(vml_get_mode() & 0x3)
 
-vml_set_mode((vml_get_mode() & ~0x0000FF00))
 function vml_check_error()
-    vml_error = ccall((:_vmlClearErrStatus, libmkl_vml_avx), Cint, ())
+    vml_error = ccall((:vmlClearErrStatus, MKL_jll.libmkl_rt), Cint, ())
     if vml_error != 0
         if vml_error == 1
             throw(DomainError(-1, "This function does not support arguments outside its domain"))
@@ -45,13 +35,13 @@ end
 
 function vml_prefix(t::DataType)
     if t == Float32
-        return "_vmls"
+        return "vs"
     elseif t == Float64
-        return "_vmld"
+        return "vd"
     elseif t == Complex{Float32}
-        return "_vmlc"
+        return "vc"
     elseif t == Complex{Float64}
-        return "_vmlz"
+        return "vz"
     end
     error("unknown type $t")
 end
@@ -63,16 +53,16 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
-        function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}) where {N}
+        function ($jlname!)(out::Array{$tout}, A::Array{$tin})
             size(out) == size(A) || throw(DimensionMismatch())
-            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
             return out
         end
         $(if tin == tout
             quote
                 function $(jlname!)(A::Array{$tin})
-                    ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
+                    ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
                     vml_check_error()
                     return A
                 end
@@ -80,7 +70,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
         end)
         function ($jlname)(A::Array{$tin})
             out = similar(A, $tout)
-            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
             return out
         end
@@ -95,16 +85,16 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
-        function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}, B::Array{$tin,N}) where {N}
-            size(out) == size(A) == size(B) || $(broadcast ? :(return broadcast!($jlname, out, A, B)) : :(throw(DimensionMismatch())))
-            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+        function ($jlname!)(out::Array{$tout}, A::Array{$tin}, B::Array{$tin}) 
+            size(out) == size(A) == size(B) || throw(DimensionMismatch("Input arrays and output array need to have the same size"))
+            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
-        function ($jlname)(A::Array{$tout,N}, B::Array{$tin,N}) where {N}
-            size(A) == size(B) || $(broadcast ? :(return broadcast($jlname, A, B)) : :(throw(DimensionMismatch())))
+        function ($jlname)(A::Array{$tout}, B::Array{$tin}) 
+            size(A) == size(B) || throw(DimensionMismatch("Input arrays need to have the same size"))
             out = similar(A)
-            ccall(($mklfn, libmkl_vml_avx), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
