@@ -53,7 +53,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
-        function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}) where {N}
+        function ($jlname!)(out::Array{$tout}, A::Array{$tin})
             size(out) == size(A) || throw(DimensionMismatch())
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
@@ -85,14 +85,14 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
-        function ($jlname!)(out::Array{$tout,N}, A::Array{$tin,N}, B::Array{$tin,N}) where {N}
-            size(out) == size(A) == size(B) || $(broadcast ? :(return broadcast!($jlname, out, A, B)) : :(throw(DimensionMismatch())))
+        function ($jlname!)(out::Array{$tout}, A::Array{$tin}, B::Array{$tin}) 
+            size(out) == size(A) == size(B) || throw(DimensionMismatch("Input arrays and output array need to have the same size"))
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
-        function ($jlname)(A::Array{$tout,N}, B::Array{$tin,N}) where {N}
-            size(A) == size(B) || $(broadcast ? :(return broadcast($jlname, A, B)) : :(throw(DimensionMismatch())))
+        function ($jlname)(A::Array{$tout}, B::Array{$tin}) 
+            size(A) == size(B) || throw(DimensionMismatch("Input arrays need to have the same size"))
             out = similar(A)
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
