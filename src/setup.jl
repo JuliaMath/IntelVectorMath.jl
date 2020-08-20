@@ -1,5 +1,5 @@
 import MKL_jll
-import LinearAlgebra:Transpose,Adjoint
+# import LinearAlgebra:Transpose,Adjoint #not work on 1.3
 
 struct VMLAccuracy
     mode::UInt
@@ -51,8 +51,8 @@ end
 checkdence(A::Array) = true
 checkdence(A::Base.ReshapedArray) = checkdence(parent(A))
 checkdence(A::Base.FastContiguousSubArray) = checkdence(parent(A))
-checkdence(A::Transpose) = min(size(A)...) == 1 && checkdence(parent(A))
-checkdence(A::Adjoint{<:Real}) = min(size(A)...) == 1 && checkdence(parent(A))
+# checkdence(A::Transpose) = min(size(A)...) == 1 && checkdence(parent(A))
+# checkdence(A::Adjoint{<:Real}) = min(size(A)...) == 1 && checkdence(parent(A))
 checkdence(A) = false
 checkdence(A::AbstractArray,B::AbstractArray) = checkdence(A) && checkdence(B)
 checkdence(A::AbstractArray,B::AbstractArray,As::Vararg{AbstractArray}) = checkdence(A) && checkdence(B,As...)
