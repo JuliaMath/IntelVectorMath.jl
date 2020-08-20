@@ -9,10 +9,6 @@ using LinearAlgebra
     A′ = @views reshape(A[:],20,5)
     B′ = reshape(IVM.sin(A′),size(B))
     @test B == B′
-    A′ = @views reshape(A[:],20,5)
-    B′ = IVM.sin(A')'
-    @test B == B′[:,1]
 
     @test_throws ArgumentError IVM.sin(view(A,1:2:100))
-    @test_throws ArgumentError IVM.abs(rand(ComplexF32,100)')
 end
