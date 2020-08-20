@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 @testset "lazy_dense_array" begin
     A = randn(100)
     B = IVM.sin(A)
