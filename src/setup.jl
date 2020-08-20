@@ -10,7 +10,7 @@ const VML_EP = VMLAccuracy(0x00000003)
 
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
-                                              
+
 vml_get_mode() = ccall((:vmlGetMode, MKL_jll.libmkl_rt), Cuint, ())
 vml_set_mode(mode::Integer) = (ccall((:vmlSetMode, MKL_jll.libmkl_rt), Cuint, (UInt,), mode); nothing)
 
@@ -46,6 +46,7 @@ function vml_prefix(t::DataType)
     error("unknown type $t")
 end
 
+const IVM_DenseArray{T} = Union{Array{T},Base.FastContiguousSubArray{T}} # add support for FastContiguousSubArray
 function def_unary_op(tin, tout, jlname, jlname!, mklname;
         vmltype = tin)
     mklfn = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$mklname"))
@@ -53,7 +54,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
-        function ($jlname!)(out::Array{$tout}, A::Array{$tin})
+        function ($jlname!)(out::IVM_DenseArray{$tout}, A::IVM_DenseArray{$tin})
             size(out) == size(A) || throw(DimensionMismatch())
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
@@ -61,14 +62,14 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
         end
         $(if tin == tout
             quote
-                function $(jlname!)(A::Array{$tin})
+                function $(jlname!)(A::IVM_DenseArray{$tin})
                     ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
                     vml_check_error()
                     return A
                 end
             end
         end)
-        function ($jlname)(A::Array{$tin})
+        function ($jlname)(A::IVM_DenseArray{$tin})
             out = similar(A, $tout)
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
@@ -85,13 +86,13 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
-        function ($jlname!)(out::Array{$tout}, A::Array{$tin}, B::Array{$tin}) 
+        function ($jlname!)(out::IVM_DenseArray{$tout}, A::IVM_DenseArray{$tin}, B::IVM_DenseArray{$tin})
             size(out) == size(A) == size(B) || throw(DimensionMismatch("Input arrays and output array need to have the same size"))
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
-        function ($jlname)(A::Array{$tout}, B::Array{$tin}) 
+        function ($jlname)(A::IVM_DenseArray{$tout}, B::IVM_DenseArray{$tin})
             size(A) == size(B) || throw(DimensionMismatch("Input arrays need to have the same size"))
             out = similar(A)
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
