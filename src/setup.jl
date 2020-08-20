@@ -46,7 +46,7 @@ function vml_prefix(t::DataType)
     error("unknown type $t")
 end
 
-const IVM_DenseArray{T} = Union{Array{T},Base.FastContiguousSubArray{T}} # add support for FastContiguousSubArray
+const IVM_DenseArray{T} = Union{Array{T,N},Base.FastContiguousSubArray{T,N,Array{T,M}}} where M # add support for FastContiguousSubArray
 function def_unary_op(tin, tout, jlname, jlname!, mklname;
         vmltype = tin)
     mklfn = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$mklname"))
