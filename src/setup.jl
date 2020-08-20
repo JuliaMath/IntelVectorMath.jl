@@ -1,4 +1,5 @@
 import MKL_jll
+import LinearAlgebra:Transpose,Adjoint
 
 struct VMLAccuracy
     mode::UInt
@@ -46,7 +47,16 @@ function vml_prefix(t::DataType)
     error("unknown type $t")
 end
 
-const IVM_DenseArray{T,N} = Union{Array{T,N},Base.FastContiguousSubArray{T,N,Array{T,M}}} where M # add support for FastContiguousSubArray
+#AbstractArray input check
+checkdence(A::Array) = true
+checkdence(A::Base.ReshapedArray) = checkdence(parent(A))
+checkdence(A::Base.FastContiguousSubArray) = checkdence(parent(A))
+checkdence(A::Transpose) = min(size(A)...) == 1 && checkdence(parent(A))
+checkdence(A::Adjoint{<:Real}) = min(size(A)...) == 1 && checkdence(parent(A))
+checkdence(A) = false
+checkdence(A::AbstractArray,B::AbstractArray) = checkdence(A) && checkdence(B)
+checkdence(A::AbstractArray,B::AbstractArray,As::Vararg{AbstractArray}) = checkdence(A) && checkdence(B,As...)
+
 function def_unary_op(tin, tout, jlname, jlname!, mklname;
         vmltype = tin)
     mklfn = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$mklname"))
@@ -54,23 +64,26 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
-        function ($jlname!)(out::IVM_DenseArray{$tout}, A::IVM_DenseArray{$tin})
-            size(out) == size(A) || throw(DimensionMismatch())
+        function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin})
+            checkdence(out,A) || throw(ArgumentError("Input arrays need to be contiguous in memory"))
+            size(out) == size(A) || throw(DimensionMismatch("Input array and output need to have the same size"))
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
             return out
         end
         $(if tin == tout
             quote
-                function $(jlname!)(A::IVM_DenseArray{$tin})
+                function $(jlname!)(A::AbstractArray{$tin})
+                    checkdence(A) || throw(ArgumentError("Input array needs to be contiguous in memory"))
                     ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
                     vml_check_error()
                     return A
                 end
             end
         end)
-        function ($jlname)(A::IVM_DenseArray{$tin})
-            out = similar(A, $tout)
+        function ($jlname)(A::AbstractArray{$tin})
+            checkdence(A) || throw(ArgumentError("Input array needs to be contiguous in memory"))
+            out = Array{$tout}(undef, size(A)) #force array output for Transpose and Adjoint
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
             return out
@@ -86,15 +99,17 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
-        function ($jlname!)(out::IVM_DenseArray{$tout}, A::IVM_DenseArray{$tin}, B::IVM_DenseArray{$tin})
+        function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin}, B::AbstractArray{$tin})
+            checkdence(out, A, B) || throw(ArgumentError("Input arrays and output array need to be contiguous in memory"))
             size(out) == size(A) == size(B) || throw(DimensionMismatch("Input arrays and output array need to have the same size"))
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
-        function ($jlname)(A::IVM_DenseArray{$tout}, B::IVM_DenseArray{$tin})
+        function ($jlname)(A::Array{$tin}, B::Array{$tin})
+            checkdence(A, B) || throw(ArgumentError("Input arrays need to be contiguous in memory"))
             size(A) == size(B) || throw(DimensionMismatch("Input arrays need to have the same size"))
-            out = similar(A)
+            out = Array{$tout}(undef, size(A)) #force array output for Transpose and Adjoint
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
