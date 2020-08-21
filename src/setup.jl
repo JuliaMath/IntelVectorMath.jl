@@ -48,14 +48,14 @@ function vml_prefix(t::DataType)
 end
 
 #AbstractArray input check
-checkcontiguous(A::Array) = true
-checkcontiguous(A::Base.ReshapedArray) = checkcontiguous(parent(A))
-checkcontiguous(A::Base.FastContiguousSubArray) = checkcontiguous(parent(A))
-checkcontiguous(A::Base.ReinterpretArray) = checkcontiguous(parent(A))
-# checkcontiguous(A::Transpose) = min(size(A)...) == 1 && checkcontiguous(parent(A))
-# checkcontiguous(A::Adjoint{<:Real}) = min(size(A)...) == 1 && checkcontiguous(parent(A))
-checkcontiguous(A) = false
-checkcontiguous(A,As...) = checkcontiguous(A) && checkcontiguous(As...)
+memorycheck(A::Array) = true
+memorycheck(A::Base.ReshapedArray) = memorycheck(parent(A))
+memorycheck(A::Base.FastContiguousSubArray) = memorycheck(parent(A))
+memorycheck(A::Base.ReinterpretArray) = memorycheck(parent(A))
+# memorycheck(A::Transpose) = min(size(A)...) == 1 && memorycheck(parent(A))
+# memorycheck(A::Adjoint{<:Real}) = min(size(A)...) == 1 && memorycheck(parent(A))
+memorycheck(A) = false
+memorycheck(A,As...) = memorycheck(A) && memorycheck(As...)
 
 function def_unary_op(tin, tout, jlname, jlname!, mklname;
         vmltype = tin)
@@ -65,7 +65,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
         function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin})
-            checkcontiguous(out,A) || throw(ArgumentError("Input arrays need to be contiguous in memory"))
+            memorycheck(out,A) || throw(ArgumentError("Input arrays need to be contiguous in memory"))
             size(out) == size(A) || throw(DimensionMismatch("Input array and output need to have the same size"))
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
@@ -74,7 +74,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
         $(if tin == tout
             quote
                 function $(jlname!)(A::AbstractArray{$tin})
-                    checkcontiguous(A) || throw(ArgumentError("Input array needs to be contiguous in memory"))
+                    memorycheck(A) || throw(ArgumentError("Input array needs to be contiguous in memory"))
                     ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
                     vml_check_error()
                     return A
@@ -82,7 +82,7 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
             end
         end)
         function ($jlname)(A::AbstractArray{$tin})
-            checkcontiguous(A) || throw(ArgumentError("Input array needs to be contiguous in memory"))
+            memorycheck(A) || throw(ArgumentError("Input array needs to be contiguous in memory"))
             out = Array{$tout}(undef, size(A)) #force array output for Transpose and Adjoint
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             vml_check_error()
@@ -100,14 +100,14 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
         function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin}, B::AbstractArray{$tin})
-            checkcontiguous(out, A, B) || throw(ArgumentError("Input arrays and output array need to be contiguous in memory"))
+            memorycheck(out, A, B) || throw(ArgumentError("Input arrays and output array need to be contiguous in memory"))
             size(out) == size(A) == size(B) || throw(DimensionMismatch("Input arrays and output array need to have the same size"))
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             vml_check_error()
             return out
         end
         function ($jlname)(A::Array{$tin}, B::Array{$tin})
-            checkcontiguous(A, B) || throw(ArgumentError("Input arrays need to be contiguous in memory"))
+            memorycheck(A, B) || throw(ArgumentError("Input arrays need to be contiguous in memory"))
             size(A) == size(B) || throw(DimensionMismatch("Input arrays need to have the same size"))
             out = Array{$tout}(undef, size(A)) #force array output for Transpose and Adjoint
             ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
