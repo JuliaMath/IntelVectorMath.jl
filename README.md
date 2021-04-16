@@ -4,7 +4,7 @@
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
 
 [![PkgEval][pkgeval-img]][pkgeval-url]
-![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.3/badge.svg)
+![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.6/badge.svg)
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://software.intel.com/en-us/node/521751).
