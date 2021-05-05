@@ -10,7 +10,7 @@ const VML_EP = VMLAccuracy(0x00000003)
 
 Base.show(io::IO, m::VMLAccuracy) = print(io, m == VML_LA ? "VML_LA" :
                                               m == VML_HA ? "VML_HA" : "VML_EP")
-                                              
+
 vml_get_mode() = ccall((:vmlGetMode, MKL_jll.libmkl_rt), Cuint, ())
 vml_set_mode(mode::Integer) = (ccall((:vmlSetMode, MKL_jll.libmkl_rt), Cuint, (UInt,), mode); nothing)
 
@@ -45,58 +45,79 @@ function vml_prefix(t::DataType)
     end
     error("unknown type $t")
 end
+alldense(x, y, z...) = alldense(x) && alldense(y, z...)
+alldense(x) = x isa DenseArray
+alldense(x::Base.ReshapedArray) = alldense(parent(x))
+alldense(x::Base.FastContiguousSubArray) = alldense(parent(x))
+alldense(x::Base.ReinterpretArray) = alldense(parent(x))
+
+getstrides(x...) = map(stride1, x)
+function stride1(x::AbstractArray)
+    alldense(x) && return 1
+    ndims(x) == 1 && return stride(x, 1)
+    st = strides(x)
+    st == Base.size_to_strides(st[1], size(x)...) || throw(ArgumentError("Invalid memory layout."))
+    st[1]
+end
 
 function def_unary_op(tin, tout, jlname, jlname!, mklname;
         vmltype = tin)
-    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$mklname"))
+    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$(mklname)I"))
+    mklfndense = Base.Meta.quot(Symbol("$(vml_prefix(vmltype))$mklname"))
     exports = Symbol[]
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
-        function ($jlname!)(out::Array{$tout}, A::Array{$tin})
+        function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin})
             size(out) == size(A) || throw(DimensionMismatch())
-            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            if alldense(out, A)
+                ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
+            else
+                stᵒ, stᴬ = getstrides(out, A)
+                ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, out, stᵒ)
+            end
             vml_check_error()
             return out
         end
         $(if tin == tout
             quote
-                function $(jlname!)(A::Array{$tin})
-                    ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
+                function $(jlname!)(A::AbstractArray{$tin})
+                    if alldense(A)
+                        ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
+                    else
+                        (stᴬ,) = getstrides(A)
+                        ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, A, stᴬ)
+                    end
                     vml_check_error()
                     return A
                 end
             end
         end)
-        function ($jlname)(A::Array{$tin})
-            out = similar(A, $tout)
-            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
-            vml_check_error()
-            return out
-        end
+        ($jlname)(A::AbstractArray{$tin}) = $(jlname!)(similar(A, $tout), A)
         $(isempty(exports) ? nothing : Expr(:export, exports...))
     end
 end
 
 function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
-    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
+    mklfndense = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
+    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$(mklname)I"))
     exports = Symbol[]
     (@isdefined jlname) || push!(exports, jlname)
     (@isdefined jlname!) || push!(exports, jlname!)
     @eval begin
         $(isempty(exports) ? nothing : Expr(:export, exports...))
-        function ($jlname!)(out::Array{$tout}, A::Array{$tin}, B::Array{$tin}) 
-            size(out) == size(A) == size(B) || throw(DimensionMismatch("Input arrays and output array need to have the same size"))
-            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
-            vml_check_error()
-            return out
-        end
-        function ($jlname)(A::Array{$tout}, B::Array{$tin}) 
+        function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin}, B::AbstractArray{$tin})
             size(A) == size(B) || throw(DimensionMismatch("Input arrays need to have the same size"))
-            out = similar(A)
-            ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            size(out) == size(A) || throw(DimensionMismatch("Output array need to have the same size with input"))
+            if alldense(out, A, B)
+                ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
+            else
+                stᵒ, stᴬ, stᴮ = getstrides(out, A, B)
+                ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, B, stᴮ, out, stᵒ)
+            end
             vml_check_error()
             return out
         end
+        ($jlname)(A::AbstractArray{$tin}, B::AbstractArray{$tin}) = ($jlname!)(similar(A, $tout), A, B)
     end
 end
