@@ -13,6 +13,7 @@ function __init__()
     if Sys.isapple() && haskey(Base.loaded_modules, Base.PkgId(compilersupportlibaries_jll_uuid, "CompilerSupportLibraries_jll"))
         @warn "It appears CompilerSupportLibraries_jll was loaded prior to this package, which currently on mac may lead to wrong results in some cases. For further details see github.com/JuliaMath/IntelVectorMath.jl"
     end
+    set_num_threads(Threads.nthreads())
 end
 
 for t in (Float32, Float64, ComplexF32, ComplexF64)
@@ -122,4 +123,10 @@ end
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
 
+function get_num_threads()
+    ccall((:MKL_Domain_Get_Max_Threads, MKL_jll.libmkl_rt), Cint, (Cint,), 3)
+end
+function set_num_threads(n::Integer)
+    ccall((:MKL_Domain_Set_Num_Threads, MKL_jll.libmkl_rt), Cint, (Cint,Cint), min(n, Threads.nthreads()), 3)
+end
 end
