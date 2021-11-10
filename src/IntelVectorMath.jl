@@ -123,10 +123,12 @@ end
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
 
-function get_num_threads()
+function get_num_threads()::Int
     ccall((:MKL_Domain_Get_Max_Threads, MKL_jll.libmkl_rt), Cint, (Cint,), 3)
 end
 function set_num_threads(n::Integer)
-    ccall((:MKL_Domain_Set_Num_Threads, MKL_jll.libmkl_rt), Cint, (Cint,Cint), min(n, Threads.nthreads()), 3)
+    flag = ccall((:MKL_Domain_Set_Num_Threads, MKL_jll.libmkl_rt), Cint, (Cint, Cint), min(n, Threads.nthreads()), 3)
+    flag == 1 || throw("Vml threads setting failed with $flag")
+    return
 end
 end
