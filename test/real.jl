@@ -58,4 +58,19 @@ end
   vml_set_accuracy(VML_EP)
   Test.@test vml_get_accuracy() == VML_EP
 
+  # Setting denormal
+  vml_set_denormalmode(VML_DENORMAL_FAST)
+  Test.@test vml_get_denormalmode() == VML_DENORMAL_FAST
+
+  vml_set_denormalmode(VML_DENORMAL_ACCURATE)
+  Test.@test vml_get_denormalmode() == VML_DENORMAL_ACCURATE
+
+  # Setting number of threads (should have at least one 1)
+  Test.@test vml_set_num_threads(1)
+  Test.@test !vml_set_num_threads(-1)
+  Test.@test vml_get_max_threads() == 1
+
+  Test.@test vml_set_num_threads(0)
+  Test.@test vml_get_max_threads() >= 1
+
 end

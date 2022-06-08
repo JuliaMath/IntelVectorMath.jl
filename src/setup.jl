@@ -123,27 +123,6 @@ const VML_NUM_THREADS_OMP_MASK    = 0x00030000
 const VML_FTZDAZ_MASK             = 0x003C0000
 const VML_TRAP_EXCEPTIONS_MASK    = 0x0F000000
 
-
-# mkl\include\mkl_vml_defines.h
-#  ERROR STATUS MACROS
-#  VML_STATUS_OK        - no errors
-#  VML_STATUS_BADSIZE   - array dimension is not positive
-#  VML_STATUS_BADMEM    - invalid pointer passed
-#  VML_STATUS_ERRDOM    - at least one of arguments is out of function domain
-#  VML_STATUS_SING      - at least one of arguments caused singularity
-#  VML_STATUS_OVERFLOW  - at least one of arguments caused overflow
-#  VML_STATUS_UNDERFLOW - at least one of arguments caused underflow
-#  VML_STATUS_ACCURACYWARNING - function doesn't support set accuracy mode,
-#                               lower accuracy mode was used instead
-const VML_STATUS_OK                  =  0
-const VML_STATUS_BADSIZE             = -1
-const VML_STATUS_BADMEM              = -2
-const VML_STATUS_ERRDOM              =  1
-const VML_STATUS_SING                =  2
-const VML_STATUS_OVERFLOW            =  3
-const VML_STATUS_UNDERFLOW           =  4
-const VML_STATUS_ACCURACYWARNING     =  1000
-
 # https://www.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/vector-mathematical-functions/vm-service-functions.html
 vml_get_mode() = ccall((:vmlGetMode, MKL_jll.libmkl_rt), Cuint, ())
 vml_set_mode(mode::Integer) = (ccall((:vmlSetMode, MKL_jll.libmkl_rt), Cuint, (UInt,), mode); nothing)
@@ -235,6 +214,26 @@ Official CPU frequency in GHz, as per package specification. See also [`vml_get_
 vml_get_max_cpu_frequency() = ccall((:MKL_Get_Max_Cpu_Frequency, MKL_jll.libmkl_rt), Cdouble, ())
 
 # -----------------------------------------------------------------------------------------------
+
+# mkl\include\mkl_vml_defines.h
+#  ERROR STATUS MACROS
+#  VML_STATUS_OK        - no errors
+#  VML_STATUS_BADSIZE   - array dimension is not positive
+#  VML_STATUS_BADMEM    - invalid pointer passed
+#  VML_STATUS_ERRDOM    - at least one of arguments is out of function domain
+#  VML_STATUS_SING      - at least one of arguments caused singularity
+#  VML_STATUS_OVERFLOW  - at least one of arguments caused overflow
+#  VML_STATUS_UNDERFLOW - at least one of arguments caused underflow
+#  VML_STATUS_ACCURACYWARNING - function doesn't support set accuracy mode,
+#                               lower accuracy mode was used instead
+const VML_STATUS_OK                  =  0
+const VML_STATUS_BADSIZE             = -1
+const VML_STATUS_BADMEM              = -2
+const VML_STATUS_ERRDOM              =  1
+const VML_STATUS_SING                =  2
+const VML_STATUS_OVERFLOW            =  3
+const VML_STATUS_UNDERFLOW           =  4
+const VML_STATUS_ACCURACYWARNING     =  1000
 
 function vml_check_error()
     vml_error = ccall((:vmlClearErrStatus, MKL_jll.libmkl_rt), Cint, ())
