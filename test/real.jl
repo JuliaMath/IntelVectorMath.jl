@@ -32,13 +32,23 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
     # cis changes type (float to complex, does not have mutating function)
     if length(inp) == 1
       if fn != :cis
-        vml_fn!(inp[1])
-        Test.@test inp[1] ≈ baseres
+        temp = similar(inp[1], 2NVALS)
+        inp1′ = @views copyto!(temp[1:2:end], inp[1])
+        inp1″ = @views copyto!(temp[end:-2:1], inp[1])
+        for x in (inp[1], inp1′, inp1″)
+          vml_fn!(x)
+          Test.@test x ≈ baseres
+        end
       end
     elseif length(inp) == 2
       out = similar(inp[1])
-      vml_fn!(out, inp...)
-      Test.@test out ≈ baseres
+      temp = similar(inp[1], 2NVALS)
+      x′ = @views copyto!(temp[1:2:end], inp[1])
+      y′ = @views copyto!(temp[end:-2:1], inp[2])
+      for (x, y) in (inp, (x′, y′))
+        vml_fn!(out, x, y)
+        Test.@test out ≈ baseres
+      end
     end
 
   end
