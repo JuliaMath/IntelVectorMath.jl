@@ -19,7 +19,14 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
   for t in (Float32, Float64), i = 1:length(fns)
     inp = input[t][i]
     mod, fn = fns[i]
-    base_fn = getproperty(mod, fn)
+    if fn === :acospi || fn === :asinpi || fn === :atanpi
+      fn′ = getproperty(mod, Symbol(string(fn)[1:end-2]))
+      base_fn = x -> oftype(x, fn′(widen(x))/pi)
+    elseif fn === :tanpi
+      base_fn = x -> oftype(x, Base.tan(widen(x)*pi))
+    else
+      base_fn = getproperty(mod, fn)
+    end
     vml_fn = getproperty(IntelVectorMath, fn)
     vml_fn! = getproperty(IntelVectorMath, Symbol(fn, "!"))
 
@@ -27,7 +34,7 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
 
     # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
     baseres = base_fn.(inp...)
-    Test.@test vml_fn(inp...) ≈ base_fn.(inp...)
+    Test.@test vml_fn(inp...) ≈ baseres
 
     # cis changes type (float to complex, does not have mutating function)
     if length(inp) == 1
