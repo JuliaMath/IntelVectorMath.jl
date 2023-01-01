@@ -368,3 +368,27 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
         ($jlname)(A::AbstractArray{$tin}, B::AbstractArray{$tin}) = ($jlname!)(similar(A, $tout), A, B)
     end
 end
+
+function def_one2two_op(tin, tout, jlname, jlname!, mklname)
+    mklfndense = Base.Meta.quot(Symbol("$(vml_prefix(tin))$mklname"))
+    mklfn = Base.Meta.quot(Symbol("$(vml_prefix(tin))$(mklname)I"))
+    exports = Symbol[]
+    (@isdefined jlname) || push!(exports, jlname)
+    (@isdefined jlname!) || push!(exports, jlname!)
+    @eval begin
+        $(isempty(exports) ? nothing : Expr(:export, exports...))
+        function ($jlname!)(out1::AbstractArray{$tout}, out2::AbstractArray{$tout}, A::AbstractArray{$tin})
+            size(out1) == size(out2) || throw(DimensionMismatch("Output arrays need to have the same size"))
+            size(A) == size(out2) || throw(DimensionMismatch("Output array need to have the same size with input"))
+            st¹, st², stᴬ = getstrides(out1, out2, A)
+            if st¹ == st² == stᴬ
+                ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, out1, out2)
+            else
+                ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, out1, st¹, out2, st²)
+            end
+            vml_check_error()
+            return out1, out2
+        end
+        ($jlname)(A::AbstractArray{$tin}) = ($jlname!)(similar(A, $tout), similar(A, $tout), A)
+    end
+end

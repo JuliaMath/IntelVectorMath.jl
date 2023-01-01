@@ -66,6 +66,8 @@ for t in (Float32, Float64)
     def_unary_op(t, t, :sind, :sind!, :Sind)
     def_unary_op(t, t, :tand, :tand!, :Tand)
 
+    def_one2two_op(t, t, :sincos, :sincos!, :SinCos)
+
     # now in SpecialFunctions (make smart, maybe?)
     def_unary_op(t, t, :erf, :erf!, :Erf)
     def_unary_op(t, t, :erfc, :erfc!, :Erfc)

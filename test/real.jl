@@ -62,6 +62,15 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
 
 end
 
+@testset "sincos" begin
+  for t in (Float32, Float64)
+    a = randindomain(t, NVALS, (-1000, 1000))
+    s, c = IVM.sincos(a)
+    @test s ≈ IVM.sin(a)
+    @test c ≈ IVM.cos(a)
+  end
+end
+
 @testset "Error Handling and Settings" begin
 
   # Verify that we still throw DomainErrors
