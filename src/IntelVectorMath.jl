@@ -54,6 +54,7 @@ for t in (Float32, Float64)
     def_unary_op(t, t, :inv_sqrt, :inv_sqrt!, :InvSqrt)
     def_unary_op(t, t, :pow2o3, :pow2o3!, :Pow2o3)
     def_unary_op(t, t, :pow3o2, :pow3o2!, :Pow3o2)
+    def_unary_op(t, t, :cdfnorm, :cdfnorm!, :CdfNorm)
 
     # Enabled only for Real. MKL guarantees higher accuracy, but at a
     # substantial performance cost.
@@ -95,7 +96,7 @@ for t in (Float32, Float64)
     def_unary_op(Complex{t}, t, :angle, :angle!, :Arg)
 
     ### cis is special, IntelVectorMath function is based on output
-    def_unary_op(t, Complex{t}, :cis, :cis!, :CIS; vmltype = Complex{t})
+    def_unary_op(t, Complex{t}, :cis, :cis!, :CIS; vmltype=Complex{t})
 
     # Binary, complex-only. These are more accurate but performance is
     # either equivalent to Base or slower.

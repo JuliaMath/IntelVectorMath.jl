@@ -2,12 +2,12 @@
 const NVALS = 1000
 
 const input = Dict(
-    t=>[
-        [ (randindomain(t, NVALS, domain),) for (_, _, domain) in base_unary_real ];
-        [ (randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
-            for (_, _, domain1, domain2) in base_binary_real ]
-    ]
-    for t in (Float32, Float64)
+  t => [
+    [(randindomain(t, NVALS, domain),) for (_, _, domain) in base_unary_real]
+    [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
+     for (_, _, domain1, domain2) in base_binary_real]
+  ]
+  for t in (Float32, Float64)
 )
 
 const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_real]]

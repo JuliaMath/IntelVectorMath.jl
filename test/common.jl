@@ -31,7 +31,8 @@ const base_unary_real = (
     (SpecialFunctions, :erfinv, (-1, 1)),
     (SpecialFunctions, :erfcinv, (0, 2)),
     (SpecialFunctions, :lgamma, (0, 1000)),
-    (SpecialFunctions, :gamma, (0, 36))
+    (SpecialFunctions, :gamma, (0, 36)),
+    (Main, :cdfnorm, (-4, 4))
 )
 
 const base_binary_real = (
@@ -82,5 +83,5 @@ function randindomain(t::Type{T}, n, domain) where {T<:Complex}
     d2 = convert(t, domain[2])
     ddiff = d2 - d1
     @assert isfinite(ddiff)
-    return rand(t, 2*n) .* ddiff .+ d1
+    return rand(t, 2 * n) .* ddiff .+ d1
 end
