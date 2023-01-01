@@ -4,7 +4,7 @@ on:
     branches:
       - master
   pull_request:
-    
+
 jobs:
   testMKLjl:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
@@ -13,7 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'
+          - "1.6"
+          - "1.8"
         os:
           - ubuntu-latest
           - macOS-latest
@@ -31,7 +32,7 @@ jobs:
         env:
           cache-name: cache-artifacts
         with:
-          path: ~/.julia/artifacts 
+          path: ~/.julia/artifacts
           key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
           restore-keys: |
             ${{ runner.os }}-test-${{ env.cache-name }}-
@@ -52,7 +53,7 @@ jobs:
   #         - ubuntu-latest
   #       arch:
   #         - x64
-  #   env: 
+  #   env:
   #       LD_LIBRARY_PATH: /opt/intel/compilers_and_libraries_2019.4.243/linux/mkl/lib/intel64_lin/
   #   steps:
   #     - name: Install MKL via apt
