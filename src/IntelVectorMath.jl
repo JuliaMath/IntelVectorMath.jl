@@ -108,5 +108,12 @@ for t in (Float32, Float64)
 end
 
 export VML_LA, VML_HA, VML_EP, vml_set_accuracy, vml_get_accuracy
+export VML_DENORMAL_FAST, VML_DENORMAL_ACCURATE, vml_set_denormalmode, vml_get_denormalmode
+export vml_get_max_threads, vml_set_num_threads
+export vml_get_cpu_frequency, vml_get_max_cpu_frequency
+
+# do not export, seems to be no-op in 2022
+# export VML_FPU_DEFAULT, VML_FPU_FLOAT32, VML_FPU_FLOAT64, VML_FPU_RESTORE, vml_set_fpumode, vml_get_fpumode
+
 
 end
