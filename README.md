@@ -7,7 +7,7 @@
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.6/badge.svg)
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
 
-This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://software.intel.com/en-us/node/521751).
+This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://www.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/vector-mathematical-functions.html).
 This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array.
 Until Julia 0.6 the package was registered as `VML.jl`.
 
@@ -65,7 +65,19 @@ implementation, although the exact results may be different. To specify
 low accuracy, use `vml_set_accuracy(VML_LA)`. To specify enhanced
 performance, use `vml_set_accuracy(VML_EP)`. More documentation
 regarding these options is available on
-[Intel's website](http://software.intel.com/sites/products/documentation/hpc/mkl/IntelVectorMath/vmldata.htm).
+[Intel's website](https://www.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/vector-mathematical-functions.html).
+
+### Denormalized numbers 
+
+On some CPU, operations on denormalized numbers are extremely slow. You case use `vml_set_denormalmode(VML_DENORMAL_FAST)`
+to handle denormalized numbers as zero. See the `?VML_DENORMAL_FAST` for more information. You can get the
+current mode by `vml_get_denormalmode()`. The default is `VML_DENORMAL_ACCURATE`.
+
+### Threads
+
+By default, IntelVectorMath uses multithreading. The maximum number of threads that a call may use
+is given by `vml_get_max_threads()`. On most environment this will default to the number of physical
+cores available to IntelVectorMath. This behavior can be changed using `vml_set_num_threads(numthreads)`.
 
 ## Performance
 Summary of Results:
@@ -229,5 +241,12 @@ Next steps for this package
 
 
 ## Advanced
+
+<!-- This does not seems to be true anymore ? No reference to CpuId.jl in the Manifest ?
+
 IntelVectorMath.jl uses [CpuId.jl](https://github.com/m-j-w/CpuId.jl) to detect if your processor supports the newer `avx2` instructions, and if not defaults to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
-If the CPU feature detection does not work for you, please open an issue.
+If the CPU feature detection does not work for you, please open an issue. -->
+
+As a quick help to convert benchmark timings into operations-per-cycle, IntelVectorMath.jl
+provides `vml_get_cpu_frequency()` which will return the *actual* current frequency of the
+CPU in GHz.
