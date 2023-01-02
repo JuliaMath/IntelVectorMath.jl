@@ -55,6 +55,9 @@ julia> b = similar(a);
 
 julia> @btime IVM.sin!(b, a);  # in-place version
   20.008 μs (0 allocations: 0 bytes)
+
+julia> @views IVM.sin(a[1:2:end]) == b[1:2:end] # all IVM functions support 1d strided input
+true
 ```
 
 ### Accuracy
@@ -247,6 +250,8 @@ Next steps for this package
 IntelVectorMath.jl uses [CpuId.jl](https://github.com/m-j-w/CpuId.jl) to detect if your processor supports the newer `avx2` instructions, and if not defaults to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
 If the CPU feature detection does not work for you, please open an issue. -->
 
-As a quick help to convert benchmark timings into operations-per-cycle, IntelVectorMath.jl
+1. As a quick help to convert benchmark timings into operations-per-cycle, IntelVectorMath.jl
 provides `vml_get_cpu_frequency()` which will return the *actual* current frequency of the
 CPU in GHz.
+
+2. Now all IVM functions accept inputs that could be reshaped to an 1d [strided array](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays).
