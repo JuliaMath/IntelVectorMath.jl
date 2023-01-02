@@ -317,10 +317,10 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
     @eval begin
         function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin})
             size(out) == size(A) || throw(DimensionMismatch())
-            if alldense(out, A)
+            if alldense(out, A) || ((sts = getstrides(out, A)) == (1, 1))
                 ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, out)
             else
-                stᵒ, stᴬ = getstrides(out, A)
+                stᵒ, stᴬ = sts
                 ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, out, stᵒ)
             end
             vml_check_error()
@@ -329,10 +329,10 @@ function def_unary_op(tin, tout, jlname, jlname!, mklname;
         $(if tin == tout
             quote
                 function $(jlname!)(A::AbstractArray{$tin})
-                    if alldense(A)
+                    if alldense(A) || ((sts = getstrides(A)) == (1,))
                         ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tout}), length(A), A, A)
                     else
-                        (stᴬ,) = getstrides(A)
+                        (stᴬ,) = sts
                         ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, A, stᴬ)
                     end
                     vml_check_error()
@@ -356,10 +356,10 @@ function def_binary_op(tin, tout, jlname, jlname!, mklname, broadcast)
         function ($jlname!)(out::AbstractArray{$tout}, A::AbstractArray{$tin}, B::AbstractArray{$tin})
             size(A) == size(B) || throw(DimensionMismatch("Input arrays need to have the same size"))
             size(out) == size(A) || throw(DimensionMismatch("Output array need to have the same size with input"))
-            if alldense(out, A, B)
+            if alldense(out, A, B) || ((sts = getstrides(out, A, B)) == (1, 1, 1))
                 ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, B, out)
             else
-                stᵒ, stᴬ, stᴮ = getstrides(out, A, B)
+                stᵒ, stᴬ, stᴮ = sts
                 ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, B, stᴮ, out, stᵒ)
             end
             vml_check_error()
@@ -380,10 +380,10 @@ function def_one2two_op(tin, tout, jlname, jlname!, mklname)
         function ($jlname!)(out1::AbstractArray{$tout}, out2::AbstractArray{$tout}, A::AbstractArray{$tin})
             size(out1) == size(out2) || throw(DimensionMismatch("Output arrays need to have the same size"))
             size(A) == size(out2) || throw(DimensionMismatch("Output array need to have the same size with input"))
-            st¹, st², stᴬ = getstrides(out1, out2, A)
-            if st¹ == st² == stᴬ
+            if alldense(out1, out2, A) || ((sts = getstrides(out1, out2, A)) == (1, 1, 1))
                 ccall(($mklfndense, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Ptr{$tin}, Ptr{$tout}), length(A), A, out1, out2)
             else
+                st¹, st², stᴬ = sts
                 ccall(($mklfn, MKL_jll.libmkl_rt), Nothing, (Int, Ptr{$tin}, Int, Ptr{$tin}, Int, Ptr{$tout}, Int), length(A), A, stᴬ, out1, st¹, out2, st²)
             end
             vml_check_error()
