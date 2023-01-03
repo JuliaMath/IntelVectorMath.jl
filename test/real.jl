@@ -19,7 +19,14 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
   for t in (Float32, Float64), i = 1:length(fns)
     inp = input[t][i]
     mod, fn = fns[i]
-    base_fn = getproperty(mod, fn)
+    if fn === :acospi || fn === :asinpi || fn === :atanpi
+      fn′ = getproperty(mod, Symbol(string(fn)[1:end-2]))
+      base_fn = x -> oftype(x, fn′(widen(x))/pi)
+    elseif fn === :tanpi
+      base_fn = x -> oftype(x, Base.tan(widen(x)*pi))
+    else
+      base_fn = getproperty(mod, fn)
+    end
     vml_fn = getproperty(IntelVectorMath, fn)
     vml_fn! = getproperty(IntelVectorMath, Symbol(fn, "!"))
 
@@ -27,22 +34,41 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
 
     # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
     baseres = base_fn.(inp...)
-    Test.@test vml_fn(inp...) ≈ base_fn.(inp...)
+    Test.@test vml_fn(inp...) ≈ baseres
 
     # cis changes type (float to complex, does not have mutating function)
     if length(inp) == 1
       if fn != :cis
-        vml_fn!(inp[1])
-        Test.@test inp[1] ≈ baseres
+        temp = similar(inp[1], 2NVALS)
+        inp1′ = @views copyto!(temp[1:2:end], inp[1])
+        inp1″ = @views copyto!(temp[end:-2:1], inp[1])
+        for x in (inp[1], inp1′, inp1″)
+          vml_fn!(x)
+          Test.@test x ≈ baseres
+        end
       end
     elseif length(inp) == 2
       out = similar(inp[1])
-      vml_fn!(out, inp...)
-      Test.@test out ≈ baseres
+      temp = similar(inp[1], 2NVALS)
+      x′ = @views copyto!(temp[1:2:end], inp[1])
+      y′ = @views copyto!(temp[end:-2:1], inp[2])
+      for (x, y) in (inp, (x′, y′))
+        vml_fn!(out, x, y)
+        Test.@test out ≈ baseres
+      end
     end
 
   end
 
+end
+
+@testset "sincos" begin
+  for t in (Float32, Float64)
+    a = randindomain(t, NVALS, (-1000, 1000))
+    s, c = IVM.sincos(a)
+    @test s ≈ IVM.sin(a)
+    @test c ≈ IVM.cos(a)
+  end
 end
 
 @testset "Error Handling and Settings" begin
