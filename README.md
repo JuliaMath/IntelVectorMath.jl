@@ -12,7 +12,7 @@ This package provides bindings to the Intel MKL [Vector Mathematics Functions](h
 This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array.
 Until Julia 0.6 the package was registered as `VML.jl`.
 
-Similar packages are [Yeppp.jl](https://github.com/JuliaMath/Yeppp.jl), which wraps the open source Yeppp library, and [AppleAccelerate.jl](https://github.com/JuliaMath/AppleAccelerate.jl), which provides access to macOS's Accelerate framework.
+Similar packages are [Yeppp.jl](https://github.com/JuliaMath/Yeppp.jl), which wraps the open-source Yeppp library, and [AppleAccelerate.jl](https://github.com/JuliaMath/AppleAccelerate.jl), which provides access to macOS's Accelerate framework.
 
 ### Warning for macOS
 There is currently [the following](https://github.com/JuliaPackaging/BinaryBuilder.jl/issues/700) issue between the `CompilerSupportLibraries_jll` artifact, which is used for example by `SpecialFunctions.jl`, and `MKL_jll`. Unless `MKL_jll` is loaded first, there might be wrong results coming from a small number of function for particular input array lengths. If you are unsure which, if any, your used packages might load this artifact, loading `IntelVectorMath` as the very first package should be fine. 
@@ -33,11 +33,11 @@ julia> ] build IntelVectorMath
 If this does not work, please open an issue and include the output of `<packagedir>/deps/build.log`.
 
 #### Renaming from VML
-If you used this package prior to its renaming, you may have to run `] rm VML` first. Otherwise there will be a conflict due to the UUID.  
+If you used this package prior to its renaming, you may have to run `] rm VML` first. Otherwise, there will be a conflict due to the UUID.  
 
 ## Using IntelVectorMath
 After loading `IntelVectorMath`, you have the supported function listed below, for example `IntelVectorMath.sin(rand(100))`. These should provide a significant speed-up over broadcasting the Base functions.
-Since the package name is quite long, an alias `IVM` is also exported to allow `IVM.sin(rand(100))` after `using` the package.
+As the package name is quite long, the alias `IVM` is also exported to allow `IVM.sin(rand(100))` after `using` the package.
 If you `import` the package, you can add this alias via `const IVM = IntelVectorMath`. Equally, you can replace `IVM` with another alias of your choice.
 
 #### Example
@@ -216,7 +216,7 @@ Allocating | Mutating
 
 ### Binary functions
 
-Allocating forms have signature `f(A, B)`. Mutating forms have
+Allocating forms have signature `f(A, B)`. Mutating forms have the
 signature `f!(out, A, B)`.
 
 Allocating | Mutating
@@ -240,7 +240,7 @@ Next steps for this package
 * [x] Add tests for mutating functions
 * [x] Add own dependency management via BinaryProvider
 * [ ] Update function list in README
-* [ ] Adopt Julia 1.3 artifact system, breaking backwards compatibility
+* [x] Adopt Julia 1.3 artifact system, breaking backwards compatibility
 
 
 

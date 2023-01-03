@@ -76,6 +76,7 @@ unary_real = (
     (:inv_sqrt, :inv_sqrt!, :InvSqrt),
     (:pow2o3, :pow2o3!, :Pow2o3),
     (:pow3o2, :pow3o2!, :Pow3o2),
+    (:cdfnorm, :cdfnorm!, :CdfNorm),
 )
 
 binary_real = (

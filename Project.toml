@@ -1,6 +1,6 @@
 name = "IntelVectorMath"
 uuid = "c8ce9da6-5d36-5c03-b118-5a70151be7bc"
-version = "0.4.3"
+version = "0.5.0"
 
 [deps]
 MKL_jll = "856f044c-d86e-5d09-b602-aeab76dc8ba7"

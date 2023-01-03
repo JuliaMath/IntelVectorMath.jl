@@ -46,6 +46,7 @@ const base_unary_real = (
     (Main, :inv_cbrt, (0, 1000)),
     (Main, :pow2o3, (-1000, 1000)),
     (Main, :pow3o2, (0, 1000)),
+    (Main, :cdfnorm, (-4, 4)),
 )
 
 const base_binary_real = (
