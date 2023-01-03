@@ -2,8 +2,8 @@
 const NVALS_complex = 1000
 
 const input_complex = Dict(
-    t=>[ (randindomain(t, NVALS_complex, domain),) for (_, _, domain) in base_unary_complex ]
-        for t in (ComplexF32, ComplexF64)
+  t => [(randindomain(t, NVALS_complex, domain),) for (_, _, domain) in base_unary_complex]
+  for t in (ComplexF32, ComplexF64)
 )
 
 const fns_complex = [x[1:2] for x in base_unary_complex]
@@ -17,6 +17,9 @@ const fns_complex = [x[1:2] for x in base_unary_complex]
   for t in (ComplexF32, ComplexF64), i = 1:length(fns_complex)
     inp = input_complex[t][i]
     mod, fn = fns_complex[i]
+
+    @info "Testing fn = $fn for t = $t"
+
     base_fn = getproperty(mod, fn)
     vml_fn = getproperty(IntelVectorMath, fn)
     vml_fn! = getproperty(IntelVectorMath, Symbol(fn, "!"))

@@ -92,5 +92,5 @@ function randindomain(t::Type{T}, n, domain) where {T<:Complex}
     d2 = convert(t, domain[2])
     ddiff = d2 - d1
     @assert isfinite(ddiff)
-    return rand(t, 2*n) .* ddiff .+ d1
+    return rand(t, 2 * n) .* ddiff .+ d1
 end

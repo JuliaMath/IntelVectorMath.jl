@@ -2,12 +2,12 @@
 const NVALS = 1000
 
 const input = Dict(
-    t=>[
-        [ (randindomain(t, NVALS, domain),) for (_, _, domain) in base_unary_real ];
-        [ (randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
-            for (_, _, domain1, domain2) in base_binary_real ]
-    ]
-    for t in (Float32, Float64)
+  t => [
+    [(randindomain(t, NVALS, domain),) for (_, _, domain) in base_unary_real]
+    [(randindomain(t, NVALS, domain1), randindomain(t, NVALS, domain2))
+     for (_, _, domain1, domain2) in base_binary_real]
+  ]
+  for t in (Float32, Float64)
 )
 
 const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_real]]
@@ -19,11 +19,14 @@ const fns = [[x[1:2] for x in base_unary_real]; [x[1:2] for x in base_binary_rea
   for t in (Float32, Float64), i = 1:length(fns)
     inp = input[t][i]
     mod, fn = fns[i]
+
+    @info "Testing fn = $fn for t = $t"
+
     if fn === :acospi || fn === :asinpi || fn === :atanpi
       fn′ = getproperty(mod, Symbol(string(fn)[1:end-2]))
-      base_fn = x -> oftype(x, fn′(widen(x))/pi)
+      base_fn = x -> oftype(x, fn′(widen(x)) / pi)
     elseif fn === :tanpi
-      base_fn = x -> oftype(x, Base.tan(widen(x)*pi))
+      base_fn = x -> oftype(x, Base.tan(widen(x) * pi))
     else
       base_fn = getproperty(mod, fn)
     end
