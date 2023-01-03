@@ -1,11 +1,11 @@
-using SpecialFunctions
+# unary functions that accept floats as inputs
 const base_unary_real = (
     (Base, :acos, (-1, 1)),
     (Base, :acospi, (-1, 1)),
     (Base, :asin, (-1, 1)),
     (Base, :asinpi, (-1, 1)),
     (Base, :atan, (-50, 50)),
-    (Base, :atanpi, (-50, 50)),
+    (Main, :atanpi, (-50, 50)),
     (Base, :cos, (-1000, 1000)),
     (Base, :cosd, (-10000, 10000)),
     (Base, :cospi, (-300, 300)),
@@ -41,12 +41,19 @@ const base_unary_real = (
     (SpecialFunctions, :erfinv, (-1, 1)),
     (SpecialFunctions, :erfcinv, (0, 2)),
     (SpecialFunctions, :lgamma, (0, 1000)),
-    (SpecialFunctions, :gamma, (0, 36))
+    (SpecialFunctions, :gamma, (0, 36)),
+    (Main, :inv_sqrt, (0, 1000)),
+    (Main, :inv_cbrt, (0, 1000)),
+    (Main, :pow2o3, (-1000, 1000)),
+    (Main, :pow3o2, (0, 1000)),
 )
 
 const base_binary_real = (
     (Base, :atan, (-1, 1), (-1, 1)),
     (Base, :hypot, (-1000, 1000), (-1000, 1000)),
+    (Main, :divide, (-1000, 1000), (-1000, 1000)),
+    (Main, :pow, (0, 100), (-5, 20)),
+    (Main, :atanpi, (-1, 1), (-1, 1)),
     # (getfield(Base, :./), (-1000, 1000), (-1000, 1000)),
     # (getfield(Base, :.^), (0, 100), (-5, 20))
 )
@@ -74,10 +81,39 @@ const base_unary_complex = (
     # (cis, (-1000, 1000))
 )
 
-# const base_binary_complex = (
-#     # (getfield(Base, :./), (-1000, 1000), (-1000, 1000)),
-#     # ((:.^), (0, 100), (-2, 10))
-# )
+const base_binary_complex = (
+    (Main, :divide, (-1000, 1000), (-1000, 1000)),
+    (Main, :pow, (0, 100), (-2, 10)),
+)
+
+@testset "Check completeness of tests" begin
+    @testset "Unary real input" begin
+        have_test_domains = getfield.(base_unary_real, 2)
+        # :cis is a special case
+        defined_functions = (getfield.(IVM.unary_real, 1)..., getfield.(IVM.unary_real_complex, 1)..., :cis)
+
+        @test isempty(symdiff(have_test_domains, defined_functions))
+    end
+
+    @testset "Binary real input" begin
+        have_test_domains = getfield.(base_binary_real, 2)
+        defined_functions = (getfield.(IVM.binary_real, 1)..., getfield.(IVM.binary_real_complex, 1)...)
+        @test isempty(symdiff(have_test_domains, defined_functions))
+    end
+
+    @testset "Unary complex input" begin
+        have_test_domains = getfield.(base_unary_complex, 2)
+        defined_functions = (getfield.(IVM.unary_complex_in, 1)..., getfield.(IVM.unary_complex_inout, 1)..., getfield.(IVM.unary_real_complex, 1)...)
+        @test isempty(symdiff(have_test_domains, defined_functions))
+    end
+
+    @testset "Binary complex input" begin
+        have_test_domains = getfield.(base_binary_complex, 2)
+        defined_functions = getfield.(IVM.binary_real_complex, 1)
+        @test isempty(symdiff(have_test_domains, defined_functions))
+    end
+
+end
 
 function randindomain(t::Type{T}, n, domain) where {T<:Real}
     d1 = convert(t, domain[1])

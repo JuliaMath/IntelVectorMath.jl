@@ -80,8 +80,9 @@ unary_real = (
 
 binary_real = (
     (:atan, :atan!, :Atan2, false),
-    (:atanpi, :atanpi!, :Atan2pi, false),
     (:hypot, :hypot!, :Hypot, false),
+    # Not in Base
+    (:atanpi, :atanpi!, :Atan2pi, false),
 )
 
 unary_complex_in = (
@@ -113,8 +114,6 @@ for t in (Float32, Float64)
         def_unary_op(t, t, f, f!, f_mkl)
     end
 
-    def_one2two_op(t, t, :sincos, :sincos!, :SinCos)
-
     for (f, f!, f_mkl, broadcast) in binary_real
         def_binary_op(t, t, f, f!, f_mkl, broadcast)
     end
@@ -129,6 +128,8 @@ for t in (Float32, Float64)
 
     ### cis is special, IntelVectorMath function is based on output
     def_unary_op(t, Complex{t}, :cis, :cis!, :CIS; vmltype=Complex{t})
+
+    def_one2two_op(t, t, :sincos, :sincos!, :SinCos)
 
     # Binary, complex-only. These are more accurate but performance is
     # either equivalent to Base or slower.
