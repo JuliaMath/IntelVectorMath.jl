@@ -14,6 +14,9 @@ pow(x, y) = x^y
 # divide
 divide(x, y) = x / y
 
+# cdfnorm
+cdfnorm(x) = 0.5 * (1 + SpecialFunctions.erf(x / sqrt(2)))
+
 # :lgamma
 # Redefining for testing to avoid deprecation warning
 SpecialFunctions.lgamma(x::Union{Float64,Float32}) = (logabsgamma(x))[1]
