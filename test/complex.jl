@@ -14,33 +14,35 @@ const fns_complex = [x[1:2] for x in base_unary_complex]
 # )
 
 @testset "Definitions and Comparison with Base for Complex" begin
-  for t in (ComplexF32, ComplexF64), i = 1:length(fns_complex)
-    inp = input_complex[t][i]
-    mod, fn = fns_complex[i]
+  for t in (ComplexF32, ComplexF64)
+    @testset "Type: $t" begin
+      for i = 1:length(fns_complex)
+        inp = input_complex[t][i]
+        mod, fn = fns_complex[i]
+        base_fn = getproperty(mod, fn)
+        vml_fn = getproperty(IntelVectorMath, fn)
+        vml_fn! = getproperty(IntelVectorMath, Symbol(fn, "!"))
 
-    @info "Testing fn = $fn for t = $t"
+        @testset "$fn" begin
 
-    base_fn = getproperty(mod, fn)
-    vml_fn = getproperty(IntelVectorMath, fn)
-    vml_fn! = getproperty(IntelVectorMath, Symbol(fn, "!"))
+          Test.@test parentmodule(vml_fn) == IntelVectorMath
 
-    Test.@test parentmodule(vml_fn) == IntelVectorMath
+          # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
+          baseres = base_fn.(inp...)
+          Test.@test vml_fn(inp...) ≈ base_fn.(inp...)
 
-    # Test.test_approx_eq(output[t][i], fn(input[t][i]...), "Base $t $fn", "IntelVectorMath $t $fn")
-    baseres = base_fn.(inp...)
-    Test.@test vml_fn(inp...) ≈ base_fn.(inp...)
-
-    if inp == 1
-      if fn != :abs && fn != :angle
-        vml_fn!(inp[1])
-        Test.@test inp[1] ≈ baseres
+          if inp == 1
+            if fn != :abs && fn != :angle
+              vml_fn!(inp[1])
+              Test.@test inp[1] ≈ baseres
+            end
+          elseif length(inp) == 2
+            out = similar(inp[1])
+            vml_fn!(out, inp...)
+            Test.@test out ≈ baseres
+          end
+        end
       end
-    elseif length(inp) == 2
-      out = similar(inp[1])
-      vml_fn!(out, inp...)
-      Test.@test out ≈ baseres
     end
-
   end
-
 end
