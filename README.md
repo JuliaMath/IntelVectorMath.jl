@@ -4,8 +4,9 @@
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
 
 [![PkgEval][pkgeval-img]][pkgeval-url]
-![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.6/badge.svg)
-![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
+[![julia](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/main.yml/badge.svg)](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/main.yml)
+![julia-nightly](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/JuliaMath/IntelVectorMath.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaMath/IntelVectorMath.jl?branch=master)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://www.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/vector-mathematical-functions.html).
 This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array.
@@ -55,6 +56,9 @@ julia> b = similar(a);
 
 julia> @btime IVM.sin!(b, a);  # in-place version
   20.008 μs (0 allocations: 0 bytes)
+
+julia> @views IVM.sin(a[1:2:end]) == b[1:2:end] # all IVM functions support 1d strided input
+true
 ```
 
 ### Accuracy
@@ -247,6 +251,8 @@ Next steps for this package
 IntelVectorMath.jl uses [CpuId.jl](https://github.com/m-j-w/CpuId.jl) to detect if your processor supports the newer `avx2` instructions, and if not defaults to `libmkl_vml_avx`. If your system does not have AVX this package will currently not work for you.
 If the CPU feature detection does not work for you, please open an issue. -->
 
-As a quick help to convert benchmark timings into operations-per-cycle, IntelVectorMath.jl
+1. As a quick help to convert benchmark timings into operations-per-cycle, IntelVectorMath.jl
 provides `vml_get_cpu_frequency()` which will return the *actual* current frequency of the
 CPU in GHz.
+
+2. Now all IVM functions accept inputs that could be reshaped to an 1d [strided array](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-strided-arrays).
