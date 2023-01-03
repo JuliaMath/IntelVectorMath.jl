@@ -18,5 +18,11 @@ divide(x, y) = x / y
 # Redefining for testing to avoid deprecation warning
 SpecialFunctions.lgamma(x::Union{Float64,Float32}) = (logabsgamma(x))[1]
 
-atanpi(x, y) = Base.atan(x, y) / pi
-atanpi(x) = Base.atan(x) / pi
+atanpi(x, y) = atan(x, y) / pi
+atanpi(x) = atan(x) / pi
+
+acospi(x) = acos(x) / pi
+asinpi(x) = asin(x) / pi
+
+# MKL has higher accuracy on Float32s
+tanpi(x) = oftype(x, Base.tan(widen(x) * pi))

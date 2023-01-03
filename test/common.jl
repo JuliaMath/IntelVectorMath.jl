@@ -1,9 +1,9 @@
 # unary functions that accept floats as inputs
 const base_unary_real = (
     (Base, :acos, (-1, 1)),
-    (Base, :acospi, (-1, 1)),
+    (Main, :acospi, (-1, 1)),
     (Base, :asin, (-1, 1)),
-    (Base, :asinpi, (-1, 1)),
+    (Main, :asinpi, (-1, 1)),
     (Base, :atan, (-50, 50)),
     (Main, :atanpi, (-50, 50)),
     (Base, :cos, (-1000, 1000)),
@@ -14,7 +14,7 @@ const base_unary_real = (
     (Base, :sinpi, (-300, 300)),
     (Base, :tan, (-1000, 1000)),
     (Base, :tand, (-10000, 10000)),
-    (Base, :tanpi, (-300, 300)),
+    (Main, :tanpi, (-300, 300)),
     (Base, :acosh, (1, 1000)),
     (Base, :asinh, (-1000, 1000)),
     (Base, :atanh, (-1, 1)),
