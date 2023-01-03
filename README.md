@@ -4,8 +4,9 @@
 [pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html
 
 [![PkgEval][pkgeval-img]][pkgeval-url]
-![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.6/badge.svg)
+![](https://github.com/JuliaMath/VML.jl/workflows/julia%201.6+1.8/badge.svg)
 ![](https://github.com/JuliaMath/VML.jl/workflows/julia%20nightly/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/JuliaMath/IntelVectorMath.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaMath/IntelVectorMath.jl?branch=master)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://www.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/vector-mathematical-functions.html).
 This is often substantially faster than broadcasting Julia's built-in functions, especially when applying a transcendental function over a large array.
