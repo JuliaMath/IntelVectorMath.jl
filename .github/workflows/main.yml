@@ -13,8 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
+          - "1.11"
           - "1.10"
-          - "1.6"
         os:
           - ubuntu-latest
           - macOS-latest
@@ -40,7 +40,8 @@ jobs:
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
-      - uses: julia-actions/julia-processcoverage@v1
+      - if: matrix.version == '1.10' && matrix.os == 'ubuntu-latest'
+        uses: julia-actions/julia-processcoverage@v1
       - if: matrix.version == '1.10' && matrix.os == 'ubuntu-latest'
         uses: coverallsapp/github-action@master
         with:
