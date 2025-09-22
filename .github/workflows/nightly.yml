@@ -1,6 +1,8 @@
 name: julia
 on:
   pull_request:
+  schedule:
+    - cron: "0 0 * * *"  # Runs daily at midnight UTC
 
 jobs:
   test:
@@ -10,8 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - "1.11"
-          - "1.10"
+          - "nightly"
         os:
           - ubuntu-latest
           - macOS-latest
@@ -19,7 +20,7 @@ jobs:
         arch:
           - x64
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.version }}
@@ -37,10 +38,3 @@ jobs:
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
-      - if: matrix.version == '1.10' && matrix.os == 'ubuntu-latest'
-        uses: julia-actions/julia-processcoverage@v1
-      - if: matrix.version == '1.10' && matrix.os == 'ubuntu-latest'
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov.info
