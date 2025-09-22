@@ -1,4 +1,4 @@
-name: julia
+name: test-nightly
 on:
   pull_request:
   schedule:
@@ -9,13 +9,11 @@ on:
 
 jobs:
   test:
-    name: ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
+    name: ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        version:
-          - "nightly"
         os:
           - ubuntu-latest
           - macOS-latest
@@ -26,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@latest
         with:
-          version: ${{ matrix.version }}
+          version: "nightly"
           arch: ${{ matrix.arch }}
       - name: Cache artifacts
         uses: actions/cache@v4

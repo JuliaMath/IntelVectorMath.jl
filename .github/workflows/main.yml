@@ -1,4 +1,4 @@
-name: julia
+name: test
 on:
   pull_request:
   push:
