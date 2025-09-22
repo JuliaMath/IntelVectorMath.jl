@@ -9,6 +9,8 @@ jobs:
   test:
     name: ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
