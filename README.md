@@ -5,7 +5,8 @@
 
 [![PkgEval][pkgeval-img]][pkgeval-url]
 [![julia](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/main.yml/badge.svg)](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/main.yml)
-![julia-nightly](https://github.com/JuliaMath/IntelVectorMath.jl/workflows/julia%20nightly/badge.svg)
+[![test](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/main.yml/badge.svg)](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/main.yml)
+[![test-nightly](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/nightly.yml/badge.svg)](https://github.com/JuliaMath/IntelVectorMath.jl/actions/workflows/nightly.yml)
 [![Coverage Status](https://coveralls.io/repos/github/JuliaMath/IntelVectorMath.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaMath/IntelVectorMath.jl?branch=master)
 
 This package provides bindings to the Intel MKL [Vector Mathematics Functions](https://www.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-c/top/vector-mathematical-functions.html).
